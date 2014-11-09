@@ -1,0 +1,26 @@
+bloonix-core (0.6) released at 2014-11-03
+
+    * Updated the license information.
+
+bloonix-core (0.5) released at 2014-10-25
+
+    * It's not possible to redirect stdout and stderr
+      to a file instead to /dev/null.
+
+bloonix-core (0.4) released at 2014-10-24
+
+    * Increased the version of Log::Handler.
+
+bloonix-core (0.3) released at 2014-10-16
+
+    * Added SIG PIPE handling.
+
+bloonix-core (0.2) released at 2014-10-15
+
+    * Updated the dependencies for IO::Socket::SSL,
+      Log::Handler and Socket6.
+
+bloonix-core (0.1) released at 2014-08-25
+
+    * Initial release.
+

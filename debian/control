@@ -1,0 +1,14 @@
+Source: bloonix-core
+Section: perl
+Priority: optional
+Build-Depends: debhelper (>= 8)
+Build-Depends-Indep: perl
+Maintainer: Jonny Schulz <js@bloonix.de>
+Standards-Version: 3.9.3
+Homepage: http://www.bloonix.de/
+
+Package: bloonix-core
+Architecture: all
+Depends: ${perl:Depends}, ca-certificates, libhttp-tiny-perl, libio-compress-perl, libio-socket-inet6-perl, libio-socket-ssl-perl (>= 1.76), libjson-perl, libjson-xs-perl, liblog-handler-perl (>= 0.84), libnet-snmp-perl, libparams-validate-perl, libsocket6-perl, libtime-modules-perl
+Description: Bloonix core modules
+ Core modules for the Bloonix application.
