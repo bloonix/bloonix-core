@@ -766,6 +766,7 @@ sub execute {
 
     my $action = delete $opts{action} || "command execution";
     my $callback = delete $opts{callback};
+    my $debug = delete $opts{debug};
 
     $opts{kill_signal} ||= 9;
     $opts{timeout} ||= 10;
@@ -788,6 +789,14 @@ sub execute {
 
     if ($ipc->is_stderr) {
         print STDERR join("\n", @{$ipc->stderr}), "\n";
+    }
+
+    if ($debug) {
+        print STDERR $self->json->pretty->encode([
+            $ipc->{command},
+            $ipc->stdout,
+            $ipc->stderr
+        ]);
     }
 
     if ($callback) {
