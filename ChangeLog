@@ -1,8 +1,8 @@
 bloonix-core (0.7) released at 2014-XX-XX
 
     * Added option debug to Bloonix::Plugin::execute.
-    * The return value of Bloonix::Plugin::execute is now
-      a scalar and not a list any more.
+    * The return value of Bloonix::Plugin::execute can
+      now be a scalar or list of scalars.
 
 bloonix-core (0.6) released at 2014-11-03
 
