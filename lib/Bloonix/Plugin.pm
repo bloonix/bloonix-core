@@ -800,15 +800,15 @@ sub execute {
     }
 
     if ($callback) {
-        my @ret;
-        eval { @ret = &$callback($ipc) };
+        my $ret;
+        eval { $ret = &$callback($ipc) };
         if ($@) {
             $self->exit(
                 status => "UNKNOWN",
                 message => $@
             );
         }
-        return @ret;
+        return $ret;
     }
 
     return $ipc;
