@@ -1,3 +1,11 @@
+bloonix-core (0.7-1) unstable; urgency=low
+
+    * Added option debug to Bloonix::Plugin::execute.
+    * The return value of Bloonix::Plugin::execute can
+      now be a scalar or list of scalars.
+
+ -- Jonny Schulz <js@bloonix.de>  Sat, 15 Nov 2014 22:20:13 +0100
+
 bloonix-core (0.6-1) unstable; urgency=low
 
     * Updated the license information.

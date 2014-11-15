@@ -1,4 +1,4 @@
-bloonix-core (0.7) released at 2014-XX-XX
+bloonix-core (0.7) released at 2014-11-15
 
     * Added option debug to Bloonix::Plugin::execute.
     * The return value of Bloonix::Plugin::execute can

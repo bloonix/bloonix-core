@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.6
+Version: 0.7
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -59,6 +59,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Sat Nov 15 2014 Jonny Schulz <js@bloonix.de> - 0.7-1
+- Added option debug to Bloonix::Plugin::execute.
+- The return value of Bloonix::Plugin::execute can
+  now be a scalar or list of scalars.
 * Mon Nov 03 2014 Jonny Schulz <js@bloonix.de> - 0.6-1
 - Updated the license information.
 * Sat Oct 25 2014 Jonny Schulz <js@bloonix.de> - 0.5-1
