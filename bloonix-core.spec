@@ -24,6 +24,7 @@ Requires: perl(IO::Uncompress::Gunzip)
 Requires: perl(IPC::Open3)
 Requires: perl(JSON)
 Requires: perl(Log::Handler) >= 0.84
+Requires: perl(Net::DNS::Resolver)
 Requires: perl(Net::SNMP)
 Requires: perl(Params::Validate)
 Requires: perl(Socket6)

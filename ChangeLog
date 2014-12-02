@@ -1,3 +1,7 @@
+bloonix-core (0.8) released at 2014-XX-XX
+
+    * Thresholds are now validated if they are numeric or not.
+
 bloonix-core (0.7) released at 2014-11-15
 
     * Added option debug to Bloonix::Plugin::execute.
