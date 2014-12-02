@@ -1070,13 +1070,6 @@ sub check_thresholds {
                 ($key, $op, $threshold) = ($1, "ge", $2);
             }
 
-            if ($op ne "eq" && $op ne "ne" && (!defined $value || $value !~ /^\d+(\.\d+){0,1}\z/)) {
-                $self->exit(
-                    status => "UNKNOWN",
-                    message => "value of threshold '$key' is not numeric"
-                );
-            }
-
             if (!exists $stats->{$key}) {
                 $self->exit(
                     status => "UNKNOWN",
@@ -1085,6 +1078,13 @@ sub check_thresholds {
             }
 
             $value = $self->convert_to_bytes($threshold);
+
+            if ($op ne "eq" && $op ne "ne" && (!defined $value || $value !~ /^\d+(\.\d+){0,1}\z/)) {
+                $self->exit(
+                    status => "UNKNOWN",
+                    message => "value of threshold '$key' is not numeric"
+                );
+            }
 
             if ($self->compare($stats->{$key}, $op, $value)) {
                 $hits->{$key}->{status} = uc $status;
