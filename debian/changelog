@@ -1,3 +1,9 @@
+bloonix-core (0.8-1) unstable; urgency=low
+
+    * Thresholds are now validated if they are numeric or not.
+
+ -- Jonny Schulz <js@bloonix.de>  Tue, 02 Dec 2014 12:24:04 +0100
+
 bloonix-core (0.7-1) unstable; urgency=low
 
     * Added option debug to Bloonix::Plugin::execute.

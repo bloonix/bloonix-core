@@ -1,4 +1,4 @@
-bloonix-core (0.8) released at 2014-XX-XX
+bloonix-core (0.8) released at 2014-12-02
 
     * Thresholds are now validated if they are numeric or not.
 
