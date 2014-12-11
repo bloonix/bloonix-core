@@ -238,53 +238,51 @@ sub manage_requests {
 
     # Just wait a second for children that are finished.
     $self->log->debug("waiting for children pipes");
-    my @ready_sockets = $self->select->can_read(1);
 
-    if (@ready_sockets && $self->log->is_debug) {
-        $self->log->debug(
+    while (my @ready_sockets = $self->select->can_read(0)) {
+        $self->log->info(
             "reading children info from",
             scalar @ready_sockets, "sockets"
         );
-    }
 
-    while (@ready_sockets) {
-        $self->log->info("get ready socket");
-        my $socket = shift @ready_sockets
-            or next;
+        foreach my $socket (@ready_sockets) {
+            next unless $socket;
 
-        $self->log->info("waiting for accept");
-        my $client = $socket->accept
-            or next;
+            $self->log->debug("waiting for accept");
 
-        $self->log->info("reading from client");
-        my $line = <$client>;
+            my $client = $socket->accept
+                or next;
 
-        if ($line =~ /^(\d+):(.+)$/) {
-            my ($pid, $status) = ($1, $2);
+            $self->log->debug("reading from client");
+            my $line = <$client>;
+
+            if ($line =~ /^(\d+):(.+)$/) {
+                my ($pid, $status) = ($1, $2);
             
-            $self->log->info("child $pid status $status");
+                $self->log->debug("child $pid status $status");
 
-            if ($status eq "ready") {
-                push @{$self->ready_children}, {
-                    pid => $pid,
-                    client => $client
-                };
-            } elsif ($status eq "alive") {
-                $self->children_alive_status->{$pid} = time;
-            } elsif ($status =~ /^done:(.*)\z/) {
-                my $message = $self->postpare_message($1);
-                my $object = delete $self->objects_in_progress->{$pid};
-                push @{$self->finished_objects}, ok => $object => $message;
-            } elsif ($status =~ /^err:(.*)\z/) {
-                my $message = $self->postpare_message($1);
-                my $object = delete $self->objects_in_progress->{$pid};
-                push @{$self->finished_objects}, err => $object => $message;
+                if ($status eq "ready") {
+                    push @{$self->ready_children}, {
+                        pid => $pid,
+                        client => $client
+                    };
+                } elsif ($status eq "alive") {
+                    $self->children_alive_status->{$pid} = time;
+                } elsif ($status =~ /^done:(.*)\z/) {
+                    my $message = $self->postpare_message($1);
+                    my $object = delete $self->objects_in_progress->{$pid};
+                    push @{$self->finished_objects}, ok => $object => $message;
+                } elsif ($status =~ /^err:(.*)\z/) {
+                    my $message = $self->postpare_message($1);
+                    my $object = delete $self->objects_in_progress->{$pid};
+                    push @{$self->finished_objects}, err => $object => $message;
+                } else {
+                    $self->log->error("invalid status received from client");
+                    $self->log->dump(error => $line);
+                }
             } else {
-                $self->log->error("invalid status received from client");
-                $self->log->dump(error => $line);
+                $self->log->error("recv invalid request: $line");
             }
-        } else {
-            $self->log->error("recv invalid request: $line");
         }
     }
 }
@@ -311,7 +309,8 @@ sub manage_objects {
         }
     }
 
-    if ($self->on_ready) {
+    if (!@{$self->ready_objects} && $self->on_ready) {
+        Time::HiRes::usleep(200_000);
         my @ready = $self->on_ready->();
         if (@ready && defined $ready[0]) {
             push @{$self->ready_objects}, @ready;
@@ -713,7 +712,7 @@ sub send_status {
 
     if (!$self->is_win32) {
         my $socket = $self->connect_to_parent;
-        $self->log->debug("agent $$ status: $status");
+        $self->log->info("agent $$ status: $status");
         print $socket "$$:$status\n";
 
         if ($status eq "ready") {
