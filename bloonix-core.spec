@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.8
+Version: 0.9
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -60,6 +60,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Thu Dec 11 2014 Jonny Schulz <js@bloonix.de> - 0.9-1
+- Improved the job distrubutor of bloonix.
 * Tue Dec 02 2014 Jonny Schulz <js@bloonix.de> - 0.8-1
 - Thresholds are now validated if they are numeric or not.
 * Sat Nov 15 2014 Jonny Schulz <js@bloonix.de> - 0.7-1
