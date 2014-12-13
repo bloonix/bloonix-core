@@ -1,4 +1,4 @@
-bloonix-core (0.10) released at 2014-XX-XX
+bloonix-core (0.10) released at 2014-12-13
 
     * Forced version of HTTP::Tiny at least to 0.022.
     * Forced version of IO::Socket::SSL at least to 1.77.
