@@ -1,3 +1,11 @@
+bloonix-core (0.10-1) unstable; urgency=low
+
+    * Forced version of HTTP::Tiny at least to 0.022.
+    * Forced version of IO::Socket::SSL at least to 1.77.
+    * Forced version of Log::Handler at least to 0.84.
+
+ -- Jonny Schulz <js@bloonix.de>  Sat, 13 Dec 2014 18:17:35 +0100
+
 bloonix-core (0.9-1) unstable; urgency=low
 
     * Improved the job distrubutor of bloonix.

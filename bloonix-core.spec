@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.9
+Version: 0.10
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -60,6 +60,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Sat Dec 13 2014 Jonny Schulz <js@bloonix.de> - 0.10-1
+- Forced version of HTTP::Tiny at least to 0.022.
+- Forced version of IO::Socket::SSL at least to 1.77.
+- Forced version of Log::Handler at least to 0.84.
 * Thu Dec 11 2014 Jonny Schulz <js@bloonix.de> - 0.9-1
 - Improved the job distrubutor of bloonix.
 * Tue Dec 02 2014 Jonny Schulz <js@bloonix.de> - 0.8-1
