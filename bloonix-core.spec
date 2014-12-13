@@ -19,7 +19,7 @@ Requires: perl(HTTP::Tiny) >= 0.022
 Requires: perl(IO::Select)
 Requires: perl(IO::Socket)
 Requires: perl(IO::Socket::INET6)
-Requires: perl(IO::Socket::SSL) >= 1.76
+Requires: perl(IO::Socket::SSL) >= 1.77
 Requires: perl(IO::Uncompress::Gunzip)
 Requires: perl(IPC::Open3)
 Requires: perl(JSON)

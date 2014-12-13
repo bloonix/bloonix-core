@@ -122,8 +122,9 @@ package Bloonix::REST;
 use strict;
 use warnings;
 use IO::Uncompress::Gunzip;
+use IO::Socket::SSL 1.77;
 use JSON;
-use Log::Handler;
+use Log::Handler 0.84;
 use HTTP::Tiny 0.022;
 use Carp qw(croak);
 
