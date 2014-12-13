@@ -149,7 +149,7 @@ sub init_worker {
     $self->is_win32($^O =~ /Win32/i ? 1 : 0);
 
     # Handle signal chld
-    $SIG{CHLD} = sub {
+    $self->{CHLD} = $SIG{CHLD} = sub {
         $self->sig_child_handler(@_);
     };
 
@@ -575,7 +575,7 @@ sub sig_child_handler {
         $self->reaped->{$pid} = $pid;
     }
 
-    $SIG{CHLD} = sub { $self->sig_child_handler(@_) };
+    $SIG{CHLD} = $self->{CHLD};
 }
 
 sub create_pid_file {

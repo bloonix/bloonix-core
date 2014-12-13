@@ -124,7 +124,7 @@ use warnings;
 use IO::Uncompress::Gunzip;
 use JSON;
 use Log::Handler;
-use HTTP::Tiny;
+use HTTP::Tiny 0.022;
 use Carp qw(croak);
 
 use base qw/Bloonix::Accessor/;

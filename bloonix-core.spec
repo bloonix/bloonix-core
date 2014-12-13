@@ -15,7 +15,7 @@ BuildRoot: %{_tmppath}/%{name}-%{version}-%{release}-root
 Source0: http://download.bloonix.de/sources/%{name}-%{version}.tar.gz
 Requires: ca-certificates
 Requires: perl(Data::Dumper)
-Requires: perl(HTTP::Tiny)
+Requires: perl(HTTP::Tiny) >= 0.022
 Requires: perl(IO::Select)
 Requires: perl(IO::Socket)
 Requires: perl(IO::Socket::INET6)
