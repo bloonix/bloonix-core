@@ -41,6 +41,7 @@ package Bloonix::Accessor;
 
 use strict;
 use warnings;
+use Bloonix::Accessor::Array;
 
 sub mk_accessors {
     my ($class, @accessors) = @_;
@@ -63,6 +64,34 @@ sub mk_counters {
             $accessor => sub {
                 $_[0]->{$accessor} += $_[1] if @_ == 2;
                 return $_[0]->{$accessor} || 0;
+            }
+        );
+    }
+}
+
+sub mk_arrays {
+    my ($class, @accessors) = @_;
+
+    foreach my $accessor (@accessors) {
+        my $array = Bloonix::Accessor::Array->new();
+
+        $class->make_accessor(
+            $accessor => sub {
+                return $array;
+            }
+        );
+    }
+}
+
+sub mk_hashs {
+    my ($class, @accessors) = @_;
+
+    foreach my $accessor (@accessors) {
+        my $hash = Bloonix::Accessor::Hash->new();
+
+        $class->make_accessor(
+            $accessor => sub {
+                return $hash;
             }
         );
     }

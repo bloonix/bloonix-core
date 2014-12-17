@@ -1079,7 +1079,7 @@ sub check_thresholds {
 
             $value = $self->convert_to_bytes($threshold);
 
-            if ($op ne "eq" && $op ne "ne" && (!defined $value || $value !~ /^\d+(\.\d+){0,1}\z/)) {
+            if ($op ne "eq" && $op ne "ne" && (!defined $value || $value !~ /^-{0,1}\d+(\.\d+){0,1}\z/)) {
                 $self->exit(
                     status => "UNKNOWN",
                     message => "value of threshold '$key' is not numeric"

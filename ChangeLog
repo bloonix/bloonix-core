@@ -1,3 +1,8 @@
+bloonix-core (0.11) released at 2014-XX-XX
+
+    * Implemented easy accessors for arrays and hashes.
+    * Allowing negative values for thresholds.
+
 bloonix-core (0.10) released at 2014-12-13
 
     * Forced version of HTTP::Tiny at least to 0.022.

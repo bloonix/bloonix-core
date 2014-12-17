@@ -2,36 +2,36 @@
 
     use strict;
     use warnings;
-    use Bloonix::Worker;
+    use Bloonix::Dispatcher;
     use Data::Dumper;
 
     my @job = qw(beer chips fish cola saltsticks);
     my @cache = @job;
     my @finish = ();
 
-    my $worker = Bloonix::Worker->new(
-        agents => 1,
+    my $dispatcher = Bloonix::Dispatcher->new(
+        worker => 1,
         sock_file => "/tmp/bloonix-location-agent.sock"
     );
 
-    $worker->on(ready => sub {
+    $dispatcher->on(ready => sub {
         print "ready called\n";
         return shift @cache;
     });
 
-    $worker->on(process => sub {
+    $dispatcher->on(process => sub {
         print "process object $_[0]\n";
 
         if ($_[0] eq "beer") {
-            $worker->send_done("successful");
+            $dispatcher->send_done("successful");
         } elsif ($_[0] eq "cola") {
-            $worker->send_err("failed");
+            $dispatcher->send_err("failed");
         } else {
             # send no message
         }
     });
 
-    $worker->on(finish => sub {
+    $dispatcher->on(finish => sub {
         print "finish called\n";
 
         while (@_) {
@@ -41,12 +41,12 @@
         }
     });
 
-    $worker->on(quit => sub {
+    $dispatcher->on(quit => sub {
         print "quit called\n";
         return @job == @finish ? 1 : 0;
     });
 
-    $worker->run;
+    $dispatcher->run;
 
     print Dumper(\@job);
     print Dumper(\@cache);
@@ -54,7 +54,7 @@
 
 =cut
 
-package Bloonix::Worker;
+package Bloonix::Dispatcher;
 
 use strict;
 use warnings;
@@ -76,16 +76,16 @@ sub new {
     my $class = shift;
     my $opts = $class->validate(@_);
     my $self = bless $opts, $class;
-    $self->init_worker;
+    $self->init_dispatcher;
     return $self;
 }
 
 sub run {
     my $self = shift;
-    $self->log->notice("start agent worker");
-    $self->run_worker;
-    $self->quit_worker;
-    $self->log->notice("agent worker stopped");
+    $self->log->notice("start agent dispatcher");
+    $self->run_dispatcher;
+    $self->quit_dispatcher;
+    $self->log->notice("agent dispatcher stopped");
 }
 
 sub on {
@@ -98,14 +98,14 @@ sub on {
     $self->{"on_$alias"} = $callback;
 }
 
-sub init_worker {
+sub init_dispatcher {
     my $self = shift;
 
     # Init the base system after we are running with the right user and group
     $self->log(Log::Handler->get_logger("bloonix"));
     $self->json(JSON->new);
 
-    $self->log->notice("initialized worker");
+    $self->log->notice("initialized dispatcher");
 
     # Create the pid file.
     $self->create_pid_file;
@@ -139,13 +139,13 @@ sub init_worker {
     # Safe objects by pid that are in progress.
     $self->objects_in_progress({});
 
-    # A flag that is set to 1 if the worker receives signal term.
+    # A flag that is set to 1 if the dispatcher receives signal term.
     $self->done(0);
 
-    # A flag that is set to 1 if the worker receives signal term.
+    # A flag that is set to 1 if the dispatcher receives signal term.
     $self->reload(0);
 
-    # Does the worker runs on win32?
+    # Does the dispatcher runs on win32?
     $self->is_win32($^O =~ /Win32/i ? 1 : 0);
 
     # Handle signal chld
@@ -201,14 +201,14 @@ sub init_socket {
     $self->select->add($socket);
 }
 
-sub quit_worker {
+sub quit_dispatcher {
     my $self = shift;
     $self->kill_children;
     $self->remove_sock_file;
     #$self->remove_pid_file;
 }
 
-sub run_worker {
+sub run_dispatcher {
     my $self = shift;
 
     # Benchmark diff:
@@ -240,7 +240,7 @@ sub manage_requests {
     $self->log->debug("waiting for children pipes");
 
     while (my @ready_sockets = $self->select->can_read(0)) {
-        $self->log->info(
+        $self->log->debug(
             "reading children info from",
             scalar @ready_sockets, "sockets"
         );
@@ -309,15 +309,18 @@ sub manage_objects {
         }
     }
 
-    if (!@{$self->ready_objects} && $self->on_ready) {
+    if (!@{$self->ready_objects} || !@{$self->ready_children}) {
         Time::HiRes::usleep(200_000);
+    }
+
+    if (!@{$self->ready_objects} && $self->on_ready) {
         my @ready = $self->on_ready->();
         if (@ready && defined $ready[0]) {
             push @{$self->ready_objects}, @ready;
         }
     }
 
-    if (@{$self->ready_objects}) {
+    if (@{$self->ready_objects} && @{$self->ready_children}) {
         my $count_children = scalar keys %{$self->children};
         my $ready_children = scalar @{$self->ready_children};
         $self->log->info(
@@ -365,10 +368,10 @@ sub manage_children {
 
     my $children = scalar keys %{ $self->children };
 
-    if ($self->{agents} > $children) {
-        $self->start_agents($self->{agents} - $children);
-    } elsif ($self->{agents} < $children) {
-        $self->stop_agents($children - $self->{agents});
+    if ($self->{worker} > $children) {
+        $self->start_worker($self->{worker} - $children);
+    } elsif ($self->{worker} < $children) {
+        $self->stop_worker($children - $self->{worker});
     }
 
     foreach my $pid (keys %{$self->children_alive_status}) {
@@ -402,7 +405,7 @@ sub reap_children {
     }
 }
 
-sub start_agents {
+sub start_worker {
     my ($self, $num) = @_;
 
     for (1..$num) {
@@ -417,7 +420,7 @@ sub start_agents {
             die "unable to fork - $!";
         } else {
             # The child must be run in an eval-block because it
-            # should never break out of start_agents.
+            # should never break out of start_worker.
             eval { $self->run_child };
             # Exit immediate
             exit($@ ? 9 : 0);
@@ -425,11 +428,11 @@ sub start_agents {
     }
 }
 
-sub stop_agents {
+sub stop_worker {
     my ($self, $num) = @_;
     my @tokill = ();
 
-    # Only each 10 seconds it's possible to kill agents
+    # Only each 10 seconds it's possible to kill worker
     # because it's necessary to reap the children from
     # the last kill.
     if ($self->{lastkill} && $self->{lastkill} + 10 > time) {
@@ -437,7 +440,7 @@ sub stop_agents {
     }
 
     $self->{lastkill} = time;
-    $self->log->notice("too much agents running, stopping $num agents");
+    $self->log->notice("too much worker running, stopping $num worker");
 
     # Only kill processes that are not working.
     if (@{$self->ready_children}) {
@@ -527,16 +530,16 @@ sub set_child_signals {
     };
 }
 
-sub set_agents {
+sub set_worker {
     my ($self, $num) = @_;
 
-    $self->{agents} = $num;    
+    $self->{worker} = $num;    
 }
 
 sub kill_children {
     my $self = shift;
 
-    # Don't TERM the worker. At first we reap all children.
+    # Don't TERM the dispatcher. At first we reap all children.
     local $SIG{TERM} = "IGNORE";
 
     $self->kill_and_wait(1, 5);
@@ -618,7 +621,7 @@ sub validate {
     my $class = shift;
 
     my %args = Params::Validate::validate(@_, {
-        agents => {
+        worker => {
             type => Params::Validate::SCALAR,
             regex => qr/^[1-9]\d*\z/,
             default => 1
@@ -676,7 +679,7 @@ sub postpare_message {
     my ($self, $message) = @_;
     my ($json, $object) = split /:/, $message, 2;
 
-    $message = $json
+    $message = $json # 0 : 1
         ? $self->json->decode($object)
         : $object;
 
