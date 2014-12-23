@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.11
+Version: 0.12
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -60,6 +60,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Tue Dec 23 2014 Jonny Schulz <js@bloonix.de> - 0.12-1
+- Fixed forwarding objects of reaped children.
 * Wed Dec 17 2014 Jonny Schulz <js@bloonix.de> - 0.11-1
 - Implemented easy accessors for arrays and hashes.
 - Allowing negative values for thresholds.
