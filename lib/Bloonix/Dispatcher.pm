@@ -271,11 +271,15 @@ sub manage_requests {
                 } elsif ($status =~ /^done:(.*)\z/) {
                     my $message = $self->postpare_message($1);
                     my $object = delete $self->objects_in_progress->{$pid};
-                    push @{$self->finished_objects}, ok => $object => $message;
+                    if ($object) { # reaped?
+                        push @{$self->finished_objects}, ok => $object => $message;
+                    }
                 } elsif ($status =~ /^err:(.*)\z/) {
                     my $message = $self->postpare_message($1);
                     my $object = delete $self->objects_in_progress->{$pid};
-                    push @{$self->finished_objects}, err => $object => $message;
+                    if ($object) { # reaped?
+                        push @{$self->finished_objects}, err => $object => $message;
+                    }
                 } else {
                     $self->log->error("invalid status received from client");
                     $self->log->dump(error => $line);
