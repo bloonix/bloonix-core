@@ -1,4 +1,4 @@
-bloonix-core (0.11) released at 2014-XX-XX
+bloonix-core (0.11) released at 2014-12-17
 
     * Implemented easy accessors for arrays and hashes.
     * Allowing negative values for thresholds.

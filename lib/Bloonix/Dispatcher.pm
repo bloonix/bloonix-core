@@ -82,10 +82,10 @@ sub new {
 
 sub run {
     my $self = shift;
-    $self->log->notice("start agent dispatcher");
+    $self->log->notice("start dispatcher");
     $self->run_dispatcher;
     $self->quit_dispatcher;
-    $self->log->notice("agent dispatcher stopped");
+    $self->log->notice("dispatcher stopped");
 }
 
 sub on {
@@ -111,7 +111,7 @@ sub init_dispatcher {
     $self->create_pid_file;
 
     # This is necessary because pwd returns an
-    # error if the agent was started from a directory
+    # error if the dispatcher was started from a directory
     # that will be deleted later.
     chdir("/");
 
@@ -153,7 +153,7 @@ sub init_dispatcher {
         $self->sig_child_handler(@_);
     };
 
-    # Signal hup is used to reload the agent
+    # Signal hup is used to reload the dispatcher
     $SIG{HUP} = sub {
         $self->log->notice("signal HUP received - reloading");
         $self->reload(1);
@@ -169,7 +169,7 @@ sub init_dispatcher {
         $self->log->notice("signal PIPE received - ignoring");
     };
 
-    # Signal term is used to stop the agent
+    # Signal term is used to stop the dispatcher
     $SIG{TERM} = sub {
         $self->log->notice("signal TERM received");
         $self->done(1);
@@ -349,7 +349,7 @@ sub manage_objects {
         # child is processing the host.
         $self->objects_in_progress->{$pid} = $object;
 
-        # Print the host configuration to the agent.
+        # Print the object configuration to the worker.
         print $client $self->json->encode({ job => $object }), "\n";
         close $client;
         $self->log->info("object send sent to child $pid");
@@ -512,7 +512,7 @@ sub set_child_signals {
     # Handle signal chld
     $SIG{CHLD} = "DEFAULT";
 
-    # Signal hup is used to reload the agent
+    # Signal hup is used to reload the dispatcher
     $SIG{HUP} = sub {
         $self->log->notice("signal HUP received");
         $self->done(1);
@@ -523,7 +523,7 @@ sub set_child_signals {
         $self->log->notice("signal INT received - ignoring");
     };
 
-    # Signal term is used to stop the agent
+    # Signal term is used to stop the dispatcher
     $SIG{TERM} = sub {
         $self->log->notice("signal TERM received");
         exit 0;
@@ -715,7 +715,7 @@ sub send_status {
 
     if (!$self->is_win32) {
         my $socket = $self->connect_to_parent;
-        $self->log->info("agent $$ status: $status");
+        $self->log->info("child $$ status: $status");
         print $socket "$$:$status\n";
 
         if ($status eq "ready") {

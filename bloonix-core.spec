@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.10
+Version: 0.11
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -60,6 +60,9 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Wed Dec 17 2014 Jonny Schulz <js@bloonix.de> - 0.11-1
+- Implemented easy accessors for arrays and hashes.
+- Allowing negative values for thresholds.
 * Sat Dec 13 2014 Jonny Schulz <js@bloonix.de> - 0.10-1
 - Forced version of HTTP::Tiny at least to 0.022.
 - Forced version of IO::Socket::SSL at least to 1.77.
