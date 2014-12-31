@@ -443,7 +443,13 @@ sub print_help {
         my $option = $self->get_option($_option);
         print "--$option->{option}";
 
-        print $option->{value} ? " <$option->{value}>\n" : "\n";
+        if ($option->{value_desc}) {
+            print "<$option->{value_desc}>\n";
+        } elsif ($option->{value}) { # deprecated
+            print "<$option->{value}>\n";
+        } else {
+            print "\n";
+        }
 
         if (exists $option->{description}) {
             if (ref $option->{description} ne "ARRAY") {
@@ -639,8 +645,10 @@ sub print_plugin_info {
             value_type => $option->{value_type}
         );
 
-        if (defined $option->{value}) {
-            $plugin{value} = $option->{value};
+        if (defined $option->{value_desc}) {
+            $plugin{value_desc} = $option->{value_desc};
+        } elsif (defined $option->{value}) { # deprecated
+            $plugin{value_desc} = $option->{value};
         }
 
         if (defined $option->{example}) {
@@ -1345,7 +1353,7 @@ sub has_threshold {
     $warning_opts->{keys} = $critical_opts->{keys} = $opts{keys};
     $warning_opts->{units} = $critical_opts->{units} = $self->{has_units};
     $warning_opts->{regex} = $critical_opts->{regex} = \@regexes;
-    $warning_opts->{value} = $critical_opts->{value} = "key:value or key:op:value";
+    $warning_opts->{value_desc} = $critical_opts->{value_desc} = "key:value or key:op:value";
 
     $self->add_option(name => "Warning threshold", %$warning_opts);
     $self->add_option(name => "Critical threshold", %$critical_opts);
