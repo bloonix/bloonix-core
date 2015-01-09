@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.12
+Version: 0.13
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -60,6 +60,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Fri Jan 09 2015 Jonny Schulz <js@bloonix.de> - 0.13-1
+- Removing all whitepaces of each line in configuration files.
+- Plugin option value is renamed to value_desc.
+- Make it possible to overwrite plugin defaults.
 * Tue Dec 23 2014 Jonny Schulz <js@bloonix.de> - 0.12-1
 - Fixed forwarding objects of reaped children.
 * Wed Dec 17 2014 Jonny Schulz <js@bloonix.de> - 0.11-1
