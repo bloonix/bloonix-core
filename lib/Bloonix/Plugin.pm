@@ -825,8 +825,15 @@ sub execute {
 sub get_ip_by_hostname {
     my ($self, $type, $hostname) = @_;
 
-    if ($hostname =~ /^\d+\.\d+\.\d+\.\d+\z/ || $hostname =~ /:/) {
+    if ($hostname =~ /^\d+\.\d+\.\d+\.\d+\z/ || $hostname =~ /:.*:/) {
         return $hostname;
+    }
+
+    if ($hostname !~ /^[a-zA-Z0-9]+([.-][a-zA-Z0-9]+){0,}\z/) {
+        $self->exit(
+            status => "UNKNOWN",
+            message => "invalid hostname $hostname"
+        );
     }
 
     require Net::DNS::Resolver;
