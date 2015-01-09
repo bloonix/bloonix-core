@@ -1,7 +1,8 @@
-bloonix-core (0.13) released at 2014-XX-XX
+bloonix-core (0.13) released at 2014-01-09
 
     * Removing all whitepaces of each line in configuration files.
     * Plugin option value is renamed to value_desc.
+    * Make it possible to overwrite plugin defaults.
 
 bloonix-core (0.12) released at 2014-12-23
 

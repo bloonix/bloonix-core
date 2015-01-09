@@ -1367,9 +1367,8 @@ sub has_warning {
         option => "warning",
         value => "seconds",
         value_type => "number",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
-        description => "A value in seconds. When the check takes longer than this time then a warning status is triggered."
+        description => "A value in seconds. When the check takes longer than this time then a warning status is triggered.",
+        %opts
     );
 }
 
@@ -1381,9 +1380,8 @@ sub has_critical {
         option => "critical",
         value => "seconds",
         value_type => "number",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
-        description => "A value in seconds. When the check takes longer than this time then a critical status is triggered."
+        description => "A value in seconds. When the check takes longer than this time then a critical status is triggered.",
+        %opts
     );
 }
 
@@ -1395,9 +1393,8 @@ sub has_timeout {
         option => "timeout",
         value => "seconds",
         value_type => "number",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
-        description => "A timeout in seconds after its expiration the check is aborted and a critical status is triggered."
+        description => "A timeout in seconds after its expiration the check is aborted and a critical status is triggered.",
+        %opts
     );
 }
 
@@ -1409,10 +1406,9 @@ sub has_host {
         option => "host",
         value => "hostname or ip address",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[^\s]+\z/,
-        description => "A hostname or IP address to connect to."
+        description => "A hostname or IP address to connect to.",
+        %opts
     );
 }
 
@@ -1424,10 +1420,9 @@ sub has_port {
         option => "port",
         value => "port",
         value_type => "int",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^(?:6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[0-5]?[0-9]{4}|[0-9]{2,4}|[1-9])\z/,
-        description => "A port number to connect to."
+        description => "A port number to connect to.",
+        %opts
     );
 }
 
@@ -1439,10 +1434,9 @@ sub has_bind {
         option => "bind",
         value => "ipaddr",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[a-fA-F0-9\.:]+\z/,
-        description => "A local IP address to bind to."
+        description => "A local IP address to bind to.",
+        %opts
     );
 }
 
@@ -1454,8 +1448,6 @@ sub has_url {
         option => "url",
         value => "url",
         value_type => "string",
-        mandatory => $opts{mandatory},
-        default => $opts{default},
         prepare => sub {
             if ($_[0] =~ m@^https{0,1}://[^/]+\z@) {
                 $_[0] = "$_[0]/";
@@ -1463,27 +1455,30 @@ sub has_url {
         },
         regex => qr@^https{0,1}://[^']+/[^\s']*\z@,
         description => "This is the HTTP or HTTPS request you want to check. Please enter the full URL with the query string.",
-        example => $opts{example} || "http://www.bloonix.de/"
+        example => "http://www.bloonix.de/",
+        %opts
     );
 }
 
 sub has_use_ipv6 {
-    my $self = shift;
+    my ($self, %opts) = @_;
 
     $self->add_option(
         name => "Use IPv6",
         option => "use-ipv6",
-        description => "Use IPv6 to connect to the host."
+        description => "Use IPv6 to connect to the host.",
+        %opts
     );
 }
 
 sub has_use_ssl {
-    my $self = shift;
+    my ($self, %opts) = @_;
 
     $self->add_option(
         name => "Use secure connection via SSL",
         option => "use-ssl",
-        description => "Use secure connection via SSL."
+        description => "Use secure connection via SSL.",
+        %opts
     );
 }
 
@@ -1495,10 +1490,9 @@ sub has_auth_basic {
         option => "username",
         value => "username",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[^\s]+\z/,
-        description => "A username for a HTTP Auth-Basic authentication."
+        description => "A username for a HTTP Auth-Basic authentication.",
+        %opts
     );
 
     $self->add_option(
@@ -1506,10 +1500,9 @@ sub has_auth_basic {
         option => "password",
         value => "password",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[^\s]+\z/,
-        description => "A password for a HTTP Auth-Basic authentication."
+        description => "A password for a HTTP Auth-Basic authentication.",
+        %opts
     );
 }
 
@@ -1521,10 +1514,9 @@ sub has_login_username {
         option => "username",
         value => "username",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[^\s]+\z/,
-        description => "The username to use for the login."
+        description => "The username to use for the login.",
+        %opts
     );
 }
 
@@ -1536,10 +1528,9 @@ sub has_login_password {
         option => "password",
         value => "password",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[^\s]+\z/,
         description => "The password for the user to login.",
+        %opts
     );
 }
 
@@ -1551,10 +1542,9 @@ sub has_database_name {
         option => "database",
         value => "database",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[^\s]+\z/,
-        description => "Set the database to connect to."
+        description => "Set the database to connect to.",
+        %opts
     );
 }
 
@@ -1566,24 +1556,24 @@ sub has_database_driver {
         option => "driver",
         value => "driver",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[a-zA-Z0-9]+\z/,
-        description => "Which perl DBD driver to use. Example: mysql, Pg, DB2 ..."
+        description => "Which perl DBD driver to use. Example: mysql, Pg, DB2 ...",
+        %opts
     );
 }
 
 sub has_login_secret_file {
     my ($self, %opts) = @_;
 
+    my $secret_file = $opts{default} || delete $opts{"example-file"} || "passwd.conf";
+
     $self->add_option(
         name => "Secret file",
         option => "secret-file",
         value => "filename",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
-        description => "This is the secret file with the username and password to connect to the service."
+        description => "This is the secret file with the username and password to connect to the service.",
+        %opts
     );
 
     $self->example(
@@ -1606,7 +1596,7 @@ sub has_login_secret_file {
             "    password=secret"
         ],
         arguments => [
-            "secret-file" => $opts{default} || $opts{"example-file"} || "passwd.conf"
+            "secret-file" => $secret_file
         ]
     );
 }
@@ -1619,31 +1609,32 @@ sub has_mailbox {
         option => "mailbox",
         value => "mailbox",
         value_type => "string",
-        default => $opts{default},
-        mandatory => $opts{mandatory},
         regex => qr/^[a-zA-Z]+\z/,
-        description => "The mailbox to query."
+        description => "The mailbox to query.",
+        %opts
     );
 }
 
 sub has_debug {
-    my $self = shift;
+    my ($self, %opts) = @_;
 
     $self->add_option(
         name => "Debug",
         option => "debug",
         description => "Turn on debugging. Just useful if you want to test something on the command line.",
-        command_line_only => 1
+        command_line_only => 1,
+        %opts
     );
 }
 
 sub has_use_apop {
-    my $self = shift;
+    my ($self, %opts) = @_;
 
     $self->add_option(
         name => "Use APOP",
         option => "apop",
-        description => "Use apop to login."
+        description => "Use apop to login.",
+        %opts
     );
 }
 
@@ -1724,9 +1715,10 @@ sub has_snmp_community {
         option => "community",
         value => "community",
         value_type => "string",
-        default => $opts{default} || "public",
+        default => "public",
         regex => qr/^[^\s]+\z/,
-        description => "The SNMP community to connect to the host."
+        description => "The SNMP community to connect to the host.",
+        %opts
     );
 }
 
@@ -1738,9 +1730,10 @@ sub has_snmp_version {
         option => "snmp-version",
         value => "version",
         value_type => "string",
-        default => $opts{default} || 2,
+        default => 2,
         regex => qr/^[123]\z/,
-        description => "The SNMP version to use to connect to the host."
+        description => "The SNMP version to use to connect to the host.",
+        %opts
     );
 }
 
@@ -1753,7 +1746,8 @@ sub has_snmp_username {
         value => "username",
         value_type => "string",
         regex => qr/^.{0,32}\z/,
-        description => "The SNMPv3 username."
+        description => "The SNMPv3 username.",
+        %opts
     );
 }
 
@@ -1765,7 +1759,8 @@ sub has_snmp_authpassword {
         option => "authpassword",
         value => "authpassword",
         value_type => "string",
-        description => "The SNMPv3 auth password."
+        description => "The SNMPv3 auth password.",
+        %opts
     );
 }
 
@@ -1777,7 +1772,8 @@ sub has_snmp_privpassword {
         option => "privpassword",
         value => "privpassword",
         value_type => "string",
-        description => "The SNMPv3 priv password."
+        description => "The SNMPv3 priv password.",
+        %opts
     );
 }
 
@@ -1789,7 +1785,8 @@ sub has_snmp_authprotocol {
         option => "authprotocol",
         value => "authprotocol",
         value_type => "string",
-        description => "The SNMPv3 auth protocol."
+        description => "The SNMPv3 auth protocol.",
+        %opts
     );
 }
 
@@ -1801,7 +1798,8 @@ sub has_snmp_privprotocol {
         option => "privprotocol",
         value => "privprotocol",
         value_type => "string",
-        description => "The SNMPv3 priv protocol."
+        description => "The SNMPv3 priv protocol.",
+        %opts
     );
 }
 
