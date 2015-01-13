@@ -823,7 +823,7 @@ sub execute {
 }
 
 sub get_ip_by_hostname {
-    my ($self, $type, $hostname) = @_;
+    my ($self, $type, $hostname, $do_not_exit) = @_;
 
     if ($hostname =~ /^\d+\.\d+\.\d+\.\d+\z/ || $hostname =~ /:.*:/) {
         return $hostname;
@@ -840,7 +840,7 @@ sub get_ip_by_hostname {
 
     if ($type =~ /ipv4/i) {
         $type = "A";
-    } elsif ($type =~ /ipv6/) {
+    } elsif ($type =~ /ipv6/i) {
         $type = "AAAA";
     }
 
