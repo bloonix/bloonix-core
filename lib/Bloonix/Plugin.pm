@@ -444,9 +444,9 @@ sub print_help {
         print "--$option->{option}";
 
         if ($option->{value_desc}) {
-            print "<$option->{value_desc}>\n";
+            print " <$option->{value_desc}>\n";
         } elsif ($option->{value}) { # deprecated
-            print "<$option->{value}>\n";
+            print " <$option->{value}>\n";
         } else {
             print "\n";
         }
