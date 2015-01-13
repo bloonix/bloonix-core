@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.13
+Version: 0.14
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -60,6 +60,9 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Tue Jan 13 2015 Jonny Schulz <js@bloonix.de> - 0.14-1
+- New option "do_not_exit" for function get_ip_by_hostname()
+  in Plugin.pm.
 * Fri Jan 09 2015 Jonny Schulz <js@bloonix.de> - 0.13-1
 - Removing all whitepaces of each line in configuration files.
 - Plugin option value is renamed to value_desc.
