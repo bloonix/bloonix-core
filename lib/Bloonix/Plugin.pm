@@ -855,7 +855,7 @@ sub get_ip_by_hostname {
         }
     }
 
-    if (!$ipaddr) {
+    if (!$ipaddr && !$do_not_exit) {
         $self->exit(
             status => "UNKNOWN",
             message => "unable to resolv hostname $hostname"
