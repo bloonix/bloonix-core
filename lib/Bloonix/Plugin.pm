@@ -120,6 +120,13 @@ sub _add_default_options {
         description => "Print the plugin information in pretty format",
         command_line_only => 1
     );
+
+    $self->add_option(
+        name => "Suggest options",
+        option => "suggest-options",
+        description => "Suggest options for auto discovery.",
+        command_line_only => 1
+    );
 }
 
 sub get_option {
@@ -186,15 +193,17 @@ sub parse_options {
         $self->print_plugin_info;
     }
 
-    $self->check_options;
+    if (!$self->option->{suggest_options}) {
+        $self->check_options;
 
-    if ($self->option->{secret_file}) {
-        ($self->option->{username}, $self->option->{password})
-            = $self->get_secret_file;
-    }
+        if ($self->option->{secret_file}) {
+            ($self->option->{username}, $self->option->{password})
+                = $self->get_secret_file;
+        }
 
-    if ($self->option->{use_ipv6}) {
-        $self->ip_version("IPv6");
+        if ($self->option->{use_ipv6}) {
+            $self->ip_version("IPv6");
+        }
     }
 
     return $self->option;
