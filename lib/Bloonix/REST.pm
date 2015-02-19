@@ -200,123 +200,37 @@ sub set_post_check {
     $self->{post_check} = $code;
 }
 
-sub pre_check {
-    my $self = shift;
-
-    if ($self->{pre_check}) {
-        my $code = $self->{pre_check};
-        return &$code(@_);
-    }
-}
-
-sub post_check {
-    my $self = shift;
-
-    if ($self->{post_check}) {
-        my $code = $self->{post_check};
-        return &$code(@_);
-    }
-}
-
 sub request {
-    my ($self, $method, %opts) = @_;
+    my $self = shift;
+    my $method = shift;
+    my $opts = {@_};
     my $uris = $self->{uri};
     my $count = scalar @$uris;
 
-    $self->pre_check($method, \%opts);
-
-    if ($self->{default_data}) {
-        %{$opts{data}} = $opts{data}
-            ? (%{$self->{default_data}}, %{$opts{data}})
-            : %{$self->{default_data}};
-    }
-
-    if (defined $opts{data}) {
-        if (ref $opts{data}) {
-            $opts{data} = $self->json->encode($opts{data});
-        }
-    }
-
-    if (defined $opts{request}) {
-        $opts{path} = $opts{request};
-    }
-
-    if (!defined $opts{path}) {
-        $opts{path} = "";
-    } else {
-        $opts{path} =~ s!^/!!;
-    }
-
-    if (!defined $opts{content_type}) {
-        $opts{content_type} = $self->{content_type};
-    }
+    $self->_pre_check;
+    $self->_inject_content_type($opts);
+    $self->_inject_default_data($opts);
+    $self->_serialize_data($opts);
+    $self->_process_path($opts);
 
     while ($count--) {
         my $uri = $uris->[0];
-        my $req_opts = {};
-        my $res;
-
-        if ($self->{set_header}) {
-            $req_opts->{headers} = $self->{set_header};
-        }
-
-        # temporary header
-        if ($opts{header}) {
-            foreach my $key (keys %{$opts{header}}) {
-                $req_opts->{headers}->{$key} = $opts{header}{$key};
-            }
-        }
-
-        if ($opts{data}) {
-            $req_opts->{content} = $opts{data};
-        }
 
         if ($self->{mode} eq "balanced") {
             push @$uris, shift @$uris;
         }
 
-        $self->log->info("rest: request '$uri/$opts{path}");
+        $self->log->info("rest: request '$uri/$opts->{path}");
 
-        $res = $self->http->request(
+        my $res = $self->http->request(
             $method,
-            "$uri/$opts{path}",
-            $req_opts
+            "$uri/$opts->{path}",
+            $self->_get_req_opts($opts)
         );
 
         if ($res->{success}) {
             $self->log->info("rest: request was successful");
-            my $content = $res->{content};
-            my $headers = $res->{headers};
-            my $encoding = $headers->{"content-encoding"};
-
-            if ($self->{reuse_cookies}) {
-                $self->reuse_cookies($headers);
-            }
-
-            eval {
-                if ($encoding && ($encoding eq "gzip" || $encoding eq "x-gzip")) {
-                    $self->log->info("rest: start uncompress content");
-                    IO::Uncompress::Gunzip::gunzip(\$content, \my $output, Transparent => 0)
-                        or die "Can't gunzip content: $IO::Uncompress::Gunzip::GunzipError";
-                    $content = $output;
-                    $self->log->info("rest: uncompress finished");
-                }
-
-                $self->log->info("rest: start de-serializing json data");
-                $self->jsonstr($content);
-                $content = $self->json->decode($content);
-            };
-
-            if ($@) {
-                $self->errstr("rest: de-serializing/de-compressing failed: $@");
-                $self->post_check;
-                return undef;
-            }
-
-            $self->log->info("rest: de-serializing json data finished");
-            $self->post_check($content);
-
-            return $content;
+            return $self->_process_content($res);
         }
 
         if ($self->{mode} eq "failover") {
@@ -324,7 +238,7 @@ sub request {
         }
 
         $self->errstr(
-            "rest: request failed to '$uri/$opts{path}': ["
+            "rest: request failed to '$uri/$opts->{path}': ["
             . $res->{status} . " " . $res->{reason}
             ."], message: ["
             . $res->{content}
@@ -332,7 +246,7 @@ sub request {
         );
     }
 
-    $self->post_check;
+    $self->_post_check;
     return undef;
 }
 
@@ -517,6 +431,124 @@ sub validate {
     }
 
     return \%opts;
+}
+
+sub _pre_check {
+    my $self = shift;
+
+    if ($self->{pre_check}) {
+        my $code = $self->{pre_check};
+        return &$code(@_);
+    }
+}
+
+sub _post_check {
+    my $self = shift;
+
+    if ($self->{post_check}) {
+        my $code = $self->{post_check};
+        return &$code(@_);
+    }
+}
+
+sub _inject_content_type {
+    my ($self, $opts) = @_;
+
+    if (!defined $opts->{content_type}) {
+        $opts->{content_type} = $self->{content_type};
+    }
+}
+
+sub _inject_default_data {
+    my ($self, $opts) = @_;
+
+    if ($self->{default_data}) {
+        %{$opts->{data}} = $opts->{data}
+            ? (%{$self->{default_data}}, %{$opts->{data}})
+            : %{$self->{default_data}};
+    }
+}
+
+sub _serialize_data {
+    my ($self, $opts) = @_;
+
+    if (defined $opts->{data}) {
+        if (ref $opts->{data}) {
+            $opts->{data} = $self->json->encode($opts->{data});
+        }
+    }
+}
+
+sub _process_path {
+    my ($self, $opts) = @_;
+
+    if (defined $opts->{request}) {
+        $opts->{path} = $opts->{request};
+    }
+
+    if (!defined $opts->{path}) {
+        $opts->{path} = "";
+    } else {
+        $opts->{path} =~ s!^/!!;
+    }
+}
+
+sub _get_req_opts {
+    my ($self, $opts) = @_;
+    my $req_opts = {};
+
+    if ($self->{set_header}) {
+        $req_opts->{headers} = $self->{set_header};
+    }
+
+    # temporary header
+    if ($opts->{header}) {
+        foreach my $key (keys %{$opts->{header}}) {
+            $req_opts->{headers}->{$key} = $opts->{header}->{$key};
+        }
+    }
+
+    if ($opts->{data}) {
+        $req_opts->{content} = $opts->{data};
+    }
+
+    return $req_opts;
+}
+
+sub _process_content {
+    my ($self, $res) = @_;
+    my $content;
+    my $headers = $res->{headers};
+    my $encoding = $headers->{"content-encoding"};
+
+    if ($self->{reuse_cookies}) {
+        $self->reuse_cookies($headers);
+    }
+
+    eval {
+        if ($encoding && ($encoding eq "gzip" || $encoding eq "x-gzip")) {
+            $self->log->info("rest: start uncompress content");
+            IO::Uncompress::Gunzip::gunzip(\$res->{content}, \$content, Transparent => 0)
+                or die "Can't gunzip content: $IO::Uncompress::Gunzip::GunzipError";
+            $self->log->info("rest: uncompress finished");
+        } else {
+            $content = $res->{content}
+        }
+
+        $self->log->info("rest: start de-serializing json data");
+        $self->jsonstr($content);
+        $content = $self->json->decode($content);
+    };
+
+    if ($@) {
+        $self->errstr("rest: de-serializing/de-compressing failed: $@");
+        $self->_post_check;
+        return undef;
+    }
+
+    $self->log->info("rest: de-serializing json data finished");
+    $self->_post_check($content);
+    return $content;
 }
 
 1;
