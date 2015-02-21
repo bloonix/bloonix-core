@@ -2,7 +2,7 @@ package Bloonix::HangUp;
 
 use strict;
 use warnings;
-use POSIX qw(getgid getuid setgid setuid setsid);
+use Bloonix::SwitchUser;
 
 sub now {
     my ($class, %opts) = @_;
@@ -25,36 +25,18 @@ sub hang_up {
 
 sub change_group {
     my ($self, $group) = @_;
-    $group ||= $self->{group};
 
-    if ($group) {
-        my $gid = getgrnam($group);
-
-        if (!defined $gid) {
-            die "Unable to get gid for group $group";
-        }
-
-        if ($gid != getgid) {
-            setgid($gid) or die "Unable to change to gid($gid) - $!";
-        }
-    }
+    Bloonix::SwitchUser->change_group(
+        $group || $self->{group};
+    );
 }
 
 sub change_user {
     my ($self, $user) = @_;
-    $user ||= $self->{user};
 
-    if ($user) {
-        my $uid = getpwnam($user);
-
-        if (!defined $uid) {
-            die "Unable to get uid for user $user";
-        }
-
-        if ($uid != getuid) {
-            setuid($uid) or die "Unable to change to uid($uid) - $!";
-        }
-    }
+    Bloonix::SwitchUser->change_user(
+        $user || $self->{user};
+    );
 }
 
 sub change_directory {

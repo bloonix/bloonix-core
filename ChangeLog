@@ -2,6 +2,7 @@ bloonix-core (0.15) released at 2014-XX-XX
 
     * Added default parameter --suggest-options to Bloonix::Plugin
       for auto discovery.
+    * Bloonix::SwtichUser to switch the user and group very simple.
 
 bloonix-core (0.14) released at 2014-01-13
 
