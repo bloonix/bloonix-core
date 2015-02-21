@@ -4,7 +4,14 @@ use strict;
 use warnings;
 use POSIX qw(getgid getuid setgid setuid);
 
-sub change_group {
+sub to {
+    my ($class, $user, $group) = @_;
+
+    $class->swtich_group($group);
+    $class->switch_user($user);
+}
+
+sub switch_group {
     my ($class, $group) = @_;
 
     if ($group) {
@@ -20,7 +27,7 @@ sub change_group {
     }
 }
 
-sub change_user {
+sub switch_user {
     my ($class, $user) = @_;
 
     if ($user) {

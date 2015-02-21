@@ -9,8 +9,8 @@ sub now {
     my $self = bless \%opts, $class;
     $self->hang_up;
     $self->create_pid_file;
-    $self->change_group;
-    $self->change_user;
+    $self->switch_group;
+    $self->switch__user;
     $self->change_directory;
     $self->redirect_to_dev_null;
 }
@@ -23,19 +23,19 @@ sub hang_up {
     exit 1 if !defined $pid;
 }
 
-sub change_group {
+sub swtich_group {
     my ($self, $group) = @_;
 
-    Bloonix::SwitchUser->change_group(
-        $group || $self->{group};
+    Bloonix::SwitchUser->switch_group(
+        $group || $self->{group}
     );
 }
 
-sub change_user {
+sub swtich_user {
     my ($self, $user) = @_;
 
-    Bloonix::SwitchUser->change_user(
-        $user || $self->{user};
+    Bloonix::SwitchUser->switch_user(
+        $user || $self->{user}
     );
 }
 
