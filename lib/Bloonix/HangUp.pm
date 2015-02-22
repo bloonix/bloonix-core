@@ -3,6 +3,7 @@ package Bloonix::HangUp;
 use strict;
 use warnings;
 use Bloonix::SwitchUser;
+use POSIX qw(setsid);
 
 sub now {
     my ($class, %opts) = @_;
