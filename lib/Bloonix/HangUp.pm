@@ -11,7 +11,7 @@ sub now {
     $self->hang_up;
     $self->create_pid_file;
     $self->switch_group;
-    $self->switch__user;
+    $self->switch_user;
     $self->change_directory;
     $self->redirect_to_dev_null;
 }
@@ -24,7 +24,7 @@ sub hang_up {
     exit 1 if !defined $pid;
 }
 
-sub swtich_group {
+sub switch_group {
     my ($self, $group) = @_;
 
     Bloonix::SwitchUser->switch_group(
@@ -32,7 +32,7 @@ sub swtich_group {
     );
 }
 
-sub swtich_user {
+sub switch_user {
     my ($self, $user) = @_;
 
     Bloonix::SwitchUser->switch_user(
