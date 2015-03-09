@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.14
+Version: 0.15
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -60,6 +60,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Mon Mar 09 2015 Jonny Schulz <js@bloonix.de> - 0.15-1
+- Added default parameter --suggest-options to Bloonix::Plugin
+  for auto discovery.
+- Bloonix::SwtichUser to switch the user and group very simple.
 * Tue Jan 13 2015 Jonny Schulz <js@bloonix.de> - 0.14-1
 - New option "do_not_exit" for function get_ip_by_hostname()
   in Plugin.pm.

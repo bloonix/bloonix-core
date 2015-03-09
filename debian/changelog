@@ -1,3 +1,11 @@
+bloonix-core (0.15-1) unstable; urgency=low
+
+    * Added default parameter --suggest-options to Bloonix::Plugin
+      for auto discovery.
+    * Bloonix::SwtichUser to switch the user and group very simple.
+
+ -- Jonny Schulz <js@bloonix.de>  Mon, 09 Mar 2015 18:08:45 +0100
+
 bloonix-core (0.14-1) unstable; urgency=low
 
     * New option "do_not_exit" for function get_ip_by_hostname()
