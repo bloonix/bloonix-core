@@ -59,7 +59,7 @@ package Bloonix::IO::SIPC;
 use strict;
 use warnings;
 use JSON;
-use IO::Socket;
+use IO::Socket::INET;
 use IO::Socket::SSL;
 use Log::Handler;
 use Params::Validate qw//;
@@ -366,77 +366,74 @@ sub _sock_error {
 sub validate {
     my $class = shift;
 
-    my %options = Params::Validate::validate(@_, {
+    my %opts = Params::Validate::validate(@_, {
         peeraddr => {
             type => Params::Validate::SCALAR,
-            optional => 1,
+            optional => 1
         },
         peerport => {
             type => Params::Validate::SCALAR,
-            optional => 1,
+            optional => 1
         },
         localaddr => {
             type => Params::Validate::SCALAR,
-            optional => 1,
+            optional => 1
         },
         localport => {
             type => Params::Validate::SCALAR,
-            optional => 1,
+            optional => 1
         },
         listen => {
             type => Params::Validate::SCALAR,
-            regex => qr/^[01]\z/,
-            optional => 1,
+            regex => qr/^(0|1|no|yes)\z/,
+            optional => 1
         },
         use_ssl => {
             type => Params::Validate::SCALAR,
-            regex => qr/^[01]\z/,
-            default => 0,
-        },
-        ssl_use_cert => {
-            type => Params::Validate::SCALAR,
-            optional => 1,
+            regex => qr/^(0|1|no|yes)\z/,
+            default => 0
         },
         ssl_ca_file => {
             type => Params::Validate::SCALAR,
-            optional => 1,
+            optional => 1
         },
         ssl_cert_file => {
             type => Params::Validate::SCALAR,
-            optional => 1,
+            optional => 1
         },
         ssl_key_file  => {
             type => Params::Validate::SCALAR,
-            optional => 1,
+            optional => 1
         },
-        ssl_passwd_cb => {
+        ssl_verify_mode => {
             type => Params::Validate::SCALAR,
-            optional => 1,
+            regex => qr/^(0|none|1|peer)\z/,
+            optional => 1
         },
         recv_max_bytes => {
             type => Params::Validate::SCALAR,
             regex => qr/^(?:unlimited|\d+(?:b{0,1}|[kmgt]b{0,1}))\z/,
-            default => "512k",
+            default => "512k"
         },
         send_max_bytes => {
             type => Params::Validate::SCALAR,
             regex => qr/^(?:unlimited|\d+(?:b{0,1}|[kmgt]b{0,1}))\z/,
-            default => 0,
+            default => 0
         },
         recv_timeout => {
             type => Params::Validate::SCALAR,
             regex => qr/^\d+\z/,
-            default => 15,
+            default => 15
         },
         send_timeout => {
             type => Params::Validate::SCALAR,
             regex => qr/^\d+\z/,
-            default => 15,
+            default => 15
         },
         timeout => {
             type => Params::Validate::SCALAR,
             regex => qr/^\d+\z/,
-            optional => 1,
+            optional => 1
         },
         recvbuf => {
             type => Params::Validate::SCALAR,
@@ -445,75 +442,89 @@ sub validate {
         }
     });
 
-    if ($options{timeout}) {
-        $options{recv_timeout} = $options{timeout};
-        $options{send_timeout} = $options{timeout};
+    if ($opts{listen} eq "no") {
+        $opts{listen} = 0;
     }
 
-    if ($options{peeraddr}) {
-        $options{peeraddr} =~ s/\s//g;
-        $options{peeraddr} = [ split /,/, $options{peeraddr} ];
+    if ($opts{use_ssl} eq "no") {
+        $opts{use_ssl} = 0;
     }
 
-    # Mapping socket options
+    if ($opts{timeout}) {
+        $opts{recv_timeout} = $opts{timeout};
+        $opts{send_timeout} = $opts{timeout};
+    }
+
+    if ($opts{peeraddr}) {
+        $opts{peeraddr} =~ s/\s//g;
+        $opts{peeraddr} = [ split /,/, $opts{peeraddr} ];
+    }
+
+    # Mapping socket opts
     my %sockopts = (
         localaddr => 'LocalAddr',
         localport => 'LocalPort',
         peerport  => 'PeerPort',
-        #peeraddr  => 'PeerAddr',
+        peeraddr  => 'PeerAddr'
     );
 
     while (my ($opt, $modopt) = each %sockopts) {
-        if ($options{$opt}) {
-            $options{sockopts}{$modopt} = $options{$opt};
+        if ($opts{$opt}) {
+            $opts{sockopts}{$modopt} = $opts{$opt};
         }
     }
 
-    if ($options{listen}) {
-        $options{sockopts}{Listen} = SOMAXCONN;
-        $options{sockopts}{Reuse}  = 1;
-        $options{sockopts}{Proto}  = "tcp";
+    if ($opts{listen}) {
+        $opts{sockopts}{Listen} = SOMAXCONN;
+        $opts{sockopts}{Reuse}  = 1;
+        $opts{sockopts}{Proto}  = "tcp";
     }
 
-    if ($options{use_ssl}) {
-        $options{sockmod} = "IO::Socket::SSL";
+    if ($opts{use_ssl}) {
+        $opts{sockmod} = "IO::Socket::SSL";
 
-        if ($options{ssl_use_cert}) {
+        if ($opts{ssl_key_file} || $opts{ssl_cert_file}) {
             foreach my $file (qw/ssl_key_file ssl_cert_file/) {
-                if (!$options{$file}) {
-                    die "Missing param '$file' in configuration";
+                if (!$opts{$file}) {
+                    die "missing param '$file' in configuration";
                 }
-                if (!-r $options{$file}) {
-                    die "File '$options{$file}' is not readable";
+                if (!-r $opts{$file}) {
+                    die "file '$opts{$file}' is not readable";
                 }
             }
 
-            if ($options{ssl_ca_file} && !-r $options{ssl_ca_file}) {
-                die "File '$options{ssl_ca_file}' is not readable";
+            if ($opts{ssl_ca_file} && !-r $opts{ssl_ca_file}) {
+                die "file '$opts{ssl_ca_file}' is not readable";
             }
+        }
 
-            my %sslopts = (
-                ssl_use_cert  => 'SSL_use_cert',
-                ssl_ca_file   => 'SSL_ca_file',
-                ssl_cert_file => 'SSL_cert_file',
-                ssl_key_file  => 'SSL_key_file',
-                ssl_passwd_cb => 'SSL_passwd_cb',
-            );
+        if (defined $opts{ssl_verify_mode}) {
+            if ($opts{ssl_verify_mode} eq "0" || $opts{ssl_verify_mode} eq "none") {
+                $opts{ssl_verify_mode} = SSL_VERIFY_NONE;
+            } elsif ($opts{ssl_verify_mode} eq "1" || $opts{ssl_verify_mode} eq "peer") {
+                $opts{ssl_verify_mode} = SSL_VERIFY_PEER;
+            }
+        }
 
-            while (my ($opt, $modopt) = each %sslopts) {
-                if ($options{$opt}) {
-                    $options{sockopts}{$modopt} = $options{$opt};
-                }
+        my %sslopts = (
+            ssl_use_cert => "SSL_use_cert",
+            ssl_ca_file  => "SSL_ca_file",
+            ssl_cert_file => "SSL_cert_file",
+            ssl_key_file => "SSL_key_file",
+            ssl_verify_mode => "SSL_verify_mode"
+        );
+
+        while (my ($opt, $modopt) = each %sslopts) {
+            if ($opts{$opt}) {
+                $opts{sockopts}{$modopt} = $opts{$opt};
             }
         }
     } else {
-        $options{sockmod} = "IO::Socket::INET";
+        $opts{sockmod} = "IO::Socket::INET";
     }
 
-    eval "use $options{sockmod}";
-
     if ($@) {
-        die "unable to load $options{sockmod}";
+        die "unable to load $opts{sockmod}";
     }
 
     my %bytes = (
@@ -525,15 +536,15 @@ sub validate {
     );
 
     foreach my $opt (qw/recv_max_bytes send_max_bytes/) {
-        if ($options{$opt} =~ /^(\d+)([bkmgt]{0,1})\z/) {
+        if ($opts{$opt} =~ /^(\d+)([bkmgt]{0,1})\z/) {
             my ($num, $byt) = ($1, $2 || 'b');
-            $options{$opt} = $num * $bytes{$byt};
+            $opts{$opt} = $num * $bytes{$byt};
         } else {
-            $options{$opt} = 0;
+            $opts{$opt} = 0;
         }
     }
 
-    return \%options;
+    return \%opts;
 }
 
 1;
