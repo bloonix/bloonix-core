@@ -1,15 +1,19 @@
-bloonix-core (0.15) released at 2014-03-09
+bloonix-core (0.16) released at 2015-XX-XX
+
+    * Added new core modules.
+
+bloonix-core (0.15) released at 2015-03-09
 
     * Added default parameter --suggest-options to Bloonix::Plugin
       for auto discovery.
     * Bloonix::SwtichUser to switch the user and group very simple.
 
-bloonix-core (0.14) released at 2014-01-13
+bloonix-core (0.14) released at 2015-01-13
 
     * New option "do_not_exit" for function get_ip_by_hostname()
       in Plugin.pm.
 
-bloonix-core (0.13) released at 2014-01-09
+bloonix-core (0.13) released at 2015-01-09
 
     * Removing all whitepaces of each line in configuration files.
     * Plugin option value is renamed to value_desc.
