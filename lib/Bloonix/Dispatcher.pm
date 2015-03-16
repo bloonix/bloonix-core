@@ -400,11 +400,11 @@ sub reap_children {
         delete $self->reaped->{$pid};
 
         # Delete the pid of reaped children.
-        $self->log->debug("reaping child $pid");
+        $self->log->info("reaping child $pid");
 
         if ($self->objects_in_progress->{$pid}) {
             my $object = delete $self->objects_in_progress->{$pid};
-            push @{$self->finished_objects}, err => $object;
+            push @{$self->finished_objects}, err => $object => undef;
         }
     }
 }

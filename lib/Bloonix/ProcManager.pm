@@ -60,7 +60,7 @@ sub daemonize {
         # Reap timed out children.
         $self->reap_children;
 
-        my ($idle, $running, $total, @idle) = $self->count_process_status;
+        my ($idle, $running, $total, @idle) = $self->check_process_status;
 
         # Kill children if max_spare_servers was reached
         # and try only to kill children in idle state.
@@ -158,7 +158,7 @@ sub set_child_sigs {
     }
 }
 
-sub count_process_status {
+sub check_process_status {
     my $self = shift;
 
     # Process status counter
@@ -395,8 +395,8 @@ sub generate_server_statistics {
 
     my $stats = {
         procs => [], ttlreq => 0,
-        S => 0, W => 0, R => 0,
-        P => 0, N => 0
+        F => 0, S => 0, _ => 0, R => 0,
+        P => 0, W => 0, N => 0,
     };
 
     foreach my $proc (@$procs) {
@@ -443,9 +443,10 @@ sub get_plain_server_status {
         #"    Total requests procesesed: $stats->{ttlreq}\n\n",
 
         sprintf("%8s worker starting up\n", $stats->{S}),
-        sprintf("%8s worker waiting for incoming request\n", $stats->{W}),
+        sprintf("%8s worker waiting for incoming request\n", $stats->{_}),
         sprintf("%8s worker reading request\n", $stats->{R}),
         sprintf("%8s worker procesing request\n", $stats->{P}),
+        sprintf("%8s worker sending data\n", $stats->{W}),
         sprintf("%8s worker in status n/a\n", $stats->{N}),
         sprintf("%8s free slots available\n\n", $stats->{F}),
 
@@ -475,6 +476,12 @@ sub get_json_server_status {
         : JSON->new->pretty(0);
 
     return $json->encode({ status => "ok", data => $self->ipc->proc_status });
+}
+
+sub get_raw_server_status {
+    my ($self, %opts) = @_;
+
+    return $self->ipc->proc_status;
 }
 
 sub timestamp {

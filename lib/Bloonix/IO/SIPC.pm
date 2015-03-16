@@ -74,6 +74,11 @@ sub new {
     my $opts = $class->validate(@_);
     my $self = bless $opts, $class;
     $self->init;
+
+    if ($self->{auto_connect}) {
+        $self->connect;
+    }
+
     return $self;
 }
 
@@ -85,7 +90,7 @@ sub init {
 
     if ($self->log->is_debug) {
         if ($self->{sockmod} eq "IO::Socket::SSL") {
-            eval "use IO::Socket::SSL qw(debug3)";
+            eval "use IO::Socket::SSL 'debug3'";
         }
 
         $self->log->debug("create a new $self->{sockmod} object");
@@ -98,21 +103,33 @@ sub init {
 sub connect {
     my $self = shift;
     my $timeout = shift || 0;
-    my $is_timeout = 0;
     my $opts = $self->{sockopts};
 
-    # BALANCE MODE .... NICHT VERGESSEN
     eval {
         local $SIG{__DIE__} = $self->die_sub;
         local $SIG{ALRM} = $self->alrm_sub;
         alarm($timeout);
 
         if ($self->{peeraddr}) {
-            foreach my $peeraddr (@{ $self->{peeraddr} }) {
-                $opts->{PeerAddr} = $peeraddr;
+            my $peers = $self->{peeraddr};
+            my $count = scalar @$peers;
 
-                if ($self->{sock} = $self->{sockmod}->new(%$opts)) {
+            while ($count--) {
+                my $peer = $peers->[0];
+
+                if ($self->{mode} eq "balanced") {
+                    push @$peers, shift @$peers;
+                }
+
+                $opts->{PeerAddr} = $peer;
+                $self->{sock} = $self->{sockmod}->new(%$opts);
+
+                if ($self->{sock}) {
                     last;
+                }
+
+                if ($self->{mode} eq "failover") {
+                    push @$peers, shift @$peers;
                 }
             }
         } else {
@@ -127,7 +144,9 @@ sub connect {
     };
 
     if ($@) {
-        return $self->_sock_error($@);
+        #$self->log->dump(error => $opts);
+        $self->_sock_error($@);
+        die $self->errstr;
     }
 
     return $self->sock;
@@ -184,7 +203,8 @@ sub disconnect {
 }
 
 sub send {
-    my ($self, $data) = @_;
+    my $self = shift;
+    my $data = @_ > 1 ? {@_} : shift;
     my $ret;
 
     $self->log->debug("encode data");
@@ -223,7 +243,7 @@ sub recv {
 
     if ($@) {
         $self->_errstr($@);
-        return (undef, 0);
+        return wantarray ? (undef, 0) : undef;
     }
 
     return wantarray ? ($data, $length) : $data;
@@ -351,11 +371,10 @@ sub _sock_error {
     $self->{errstr} = shift;
 
     if ($self->{sockmod} eq "IO::Socket::SSL") {
-        my $sslerr = $self->sock ? $self->sock->errstr : IO::Socket::SSL->errstr;
-
-        if ($sslerr) {
-            $self->{errstr} .= " - $sslerr";
-        }
+        $self->{errstr} .= join(" - ",
+            IO::Socket::SSL->errstr,
+            $IO::Socket::SSL::SSL_ERROR
+        );
     } else {
         $self->{errstr} .= " - $@";
     }
@@ -367,6 +386,14 @@ sub validate {
     my $class = shift;
 
     my %opts = Params::Validate::validate(@_, {
+        host => {
+            type => Params::Validate::SCALAR,
+            optional => 1
+        },
+        port => {
+            type => Params::Validate::SCALAR,
+            optional => 1
+        },
         peeraddr => {
             type => Params::Validate::SCALAR,
             optional => 1
@@ -394,6 +421,10 @@ sub validate {
             default => 0
         },
         ssl_ca_file => {
+            type => Params::Validate::SCALAR,
+            optional => 1
+        },
+        ssl_ca_path => {
             type => Params::Validate::SCALAR,
             optional => 1
         },
@@ -439,15 +470,48 @@ sub validate {
             type => Params::Validate::SCALAR,
             regex => qr/^\d+\z/,
             default => 16384
+        },
+        auto_connect => {
+            type => Params::Validate::SCALAR,
+            regex => qr/^(0|1|no|yes)\z/,
+            default => 0
+        },
+        mode => {
+            type => Params::Validate::SCALAR,
+            regex => qr/^(failover|balanced)\z/,
+            default => "failover"
+        },
+        force_ipv4 => {
+            type => Params::Validate::SCALAR,
+            regex => qr/^(0|1|no|yes)\z/,
+            default => "yes"
         }
     });
 
-    if ($opts{listen} eq "no") {
-        $opts{listen} = 0;
+    foreach my $key (qw/listen use_ssl auto_connect force_ipv4/) {
+        if (defined $opts{$key} && $opts{$key} eq "no") {
+            $opts{$key} = 0;
+        }
     }
 
-    if ($opts{use_ssl} eq "no") {
-        $opts{use_ssl} = 0;
+    if ($opts{host}) {
+        if ($opts{listen}) {
+            $opts{localaddr} = delete $opts{host};
+        } else {
+            $opts{peeraddr} = delete $opts{host};
+        }
+    }
+
+    if ($opts{port}) {
+        if ($opts{listen}) {
+            $opts{localport} = delete $opts{port};
+        } else {
+            $opts{peerport} = delete $opts{port};
+        }
+    }
+
+    if ($opts{force_ipv4}) {
+        eval "use IO::Socket::SSL 'inet4'";
     }
 
     if ($opts{timeout}) {
@@ -509,6 +573,7 @@ sub validate {
         my %sslopts = (
             ssl_use_cert => "SSL_use_cert",
             ssl_ca_file  => "SSL_ca_file",
+            ssl_ca_path  => "SSL_ca_path",
             ssl_cert_file => "SSL_cert_file",
             ssl_key_file => "SSL_key_file",
             ssl_verify_mode => "SSL_verify_mode"

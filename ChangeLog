@@ -1,6 +1,7 @@
 bloonix-core (0.16) released at 2015-XX-XX
 
     * Added new core modules.
+    * Bug fixed in Dispatcher.pm with finished objects.
 
 bloonix-core (0.15) released at 2015-03-09
 
