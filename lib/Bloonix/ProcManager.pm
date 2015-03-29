@@ -7,12 +7,13 @@ use JSON;
 use Log::Handler;
 use Params::Validate qw();
 use POSIX qw(:sys_wait_h);
+use Sys::Hostname qw();
 use Time::HiRes qw();
 
 use constant PARENT_PID => $$;
 
 use base qw(Bloonix::Accessor);
-__PACKAGE__->mk_accessors(qw/children done ipc json kill_procs log next_kill reload request socket to_reap/);
+__PACKAGE__->mk_accessors(qw/children done hostname ipc json kill_procs log next_kill reload request socket to_reap/);
 __PACKAGE__->mk_counters(qw/ttlreq/);
 
 our $VERSION = "0.1";
@@ -43,6 +44,7 @@ sub init {
     $self->log(Log::Handler->get_logger("bloonix"));
     $self->ipc(Bloonix::IPC::SharedFile->new($self->{max_servers}, $self->{lockfile}));
     $self->done(0);
+    $self->hostname(Sys::Hostname::hostname());
     $self->children({});
     $self->to_reap({});
     $self->kill_procs(0);
@@ -421,6 +423,8 @@ sub get_plain_server_status {
     push @content, (
         "Content-Type: text/plain\n\n",
 
+        "Hostname: ". $self->hostname ."\n\n",
+
         "* Column description\n\n",
         "    PID     - The process id.\n",
         "    STATUS  - The current status of the process.\n",
@@ -475,7 +479,7 @@ sub get_json_server_status {
         ? JSON->new->pretty(1)
         : JSON->new->pretty(0);
 
-    return $json->encode({ status => "ok", data => $self->ipc->proc_status });
+    return $json->encode({ status => "ok", hostname => $self->hostname, data => $self->ipc->proc_status });
 }
 
 sub get_raw_server_status {
@@ -534,7 +538,7 @@ sub validate {
         },
         lockfile => {
             type => Params::Validate::SCALAR,
-            default => "/var/cache/bloonix/blxipc.%P.lock"
+            default => "/var/lib/bloonix/ipc/%P.lock"
         }
     });
 

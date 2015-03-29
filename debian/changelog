@@ -1,3 +1,10 @@
+bloonix-core (0.16-1) unstable; urgency=low
+
+    * Added new core modules.
+    * Bug fixed in Dispatcher.pm with finished objects.
+
+ -- Jonny Schulz <js@bloonix.de>  Sat, 21 Mar 2015 22:15:55 +0100
+
 bloonix-core (0.15-1) unstable; urgency=low
 
     * Added default parameter --suggest-options to Bloonix::Plugin

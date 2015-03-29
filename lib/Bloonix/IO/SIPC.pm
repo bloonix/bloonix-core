@@ -103,16 +103,21 @@ sub init {
 sub connect {
     my $self = shift;
     my $timeout = shift || 0;
-    my $opts = $self->{sockopts};
+    my %opts = %{$self->{sockopts}};
 
     eval {
         local $SIG{__DIE__} = $self->die_sub;
         local $SIG{ALRM} = $self->alrm_sub;
-        alarm($timeout);
 
         if ($self->{peeraddr}) {
             my $peers = $self->{peeraddr};
             my $count = scalar @$peers;
+
+            if ($timeout) {
+                $opts{Timeout} = $timeout;
+                $timeout = $timeout * $count + 5;
+                alarm($timeout);
+            }
 
             while ($count--) {
                 my $peer = $peers->[0];
@@ -121,8 +126,8 @@ sub connect {
                     push @$peers, shift @$peers;
                 }
 
-                $opts->{PeerAddr} = $peer;
-                $self->{sock} = $self->{sockmod}->new(%$opts);
+                $opts{PeerAddr} = $peer;
+                $self->{sock} = $self->{sockmod}->new(%opts);
 
                 if ($self->{sock}) {
                     last;
@@ -133,7 +138,10 @@ sub connect {
                 }
             }
         } else {
-            $self->{sock} = $self->{sockmod}->new(%$opts);
+            if ($timeout) {
+                alarm($timeout);
+            }
+            $self->{sock} = $self->{sockmod}->new(%opts);
         }
 
         if (!$self->{sock}) {
@@ -371,10 +379,10 @@ sub _sock_error {
     $self->{errstr} = shift;
 
     if ($self->{sockmod} eq "IO::Socket::SSL") {
-        $self->{errstr} .= join(" - ",
-            IO::Socket::SSL->errstr,
-            $IO::Socket::SSL::SSL_ERROR
-        );
+        $self->{errstr} = IO::Socket::SSL->errstr;
+        if ($IO::Socket::SSL::SSL_ERROR) {
+            $self->{errstr} .= " - ". $IO::Socket::SSL::SSL_ERROR;
+        }
     } else {
         $self->{errstr} .= " - $@";
     }
@@ -466,6 +474,11 @@ sub validate {
             regex => qr/^\d+\z/,
             optional => 1
         },
+        connect_timeout => {
+            type => Params::Validate::SCALAR,
+            regex => qr/^\d+\z/,
+            default => 10
+        },
         recvbuf => {
             type => Params::Validate::SCALAR,
             regex => qr/^\d+\z/,
@@ -485,7 +498,7 @@ sub validate {
             type => Params::Validate::SCALAR,
             regex => qr/^(0|1|no|yes)\z/,
             default => "yes"
-        }
+        },
     });
 
     foreach my $key (qw/listen use_ssl auto_connect force_ipv4/) {
@@ -542,6 +555,8 @@ sub validate {
         $opts{sockopts}{Listen} = SOMAXCONN;
         $opts{sockopts}{Reuse}  = 1;
         $opts{sockopts}{Proto}  = "tcp";
+    } elsif ($opts{connect_timeout}) {
+        $opts{sockopts}{Timeout} = $opts{connect_timeout};
     }
 
     if ($opts{use_ssl}) {

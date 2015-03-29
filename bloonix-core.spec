@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.15
+Version: 0.16
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -61,6 +61,9 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Sat Mar 21 2015 Jonny Schulz <js@bloonix.de> - 0.16-1
+- Added new core modules.
+- Bug fixed in Dispatcher.pm with finished objects.
 * Mon Mar 09 2015 Jonny Schulz <js@bloonix.de> - 0.15-1
 - Added default parameter --suggest-options to Bloonix::Plugin
   for auto discovery.
