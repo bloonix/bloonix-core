@@ -11,6 +11,10 @@ sub new {
     my ($class, $slots, $lockfile) = @_;
     my $self = bless { }, $class;
 
+    if ($slots > 10000) {
+        die "too much slots configured, only 10000 slots are allowed";
+    }
+
     $self->{free_slots} = [ 0 .. $slots - 1 ];
     $self->{used_slots} = { };
     $self->{slot_size}  = 1024;
