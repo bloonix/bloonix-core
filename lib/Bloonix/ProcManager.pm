@@ -126,7 +126,7 @@ sub set_parent_sigs {
 
     foreach my $sig (qw/INT TERM PIPE/) {
         $SIG{$sig} = sub {
-            $self->log->warning("signal $sig received");
+            $self->log->notice("signal $sig received");
             $self->done(1);
         };
     }
@@ -134,8 +134,8 @@ sub set_parent_sigs {
     foreach my $sig (qw/USR1 USR2/) {
         $SIG{$sig} = sub {
             my @chld = keys %{$self->{children}};
-            $self->log->warning("signal $sig received");
-            $self->log->warning("sending $sig to", @chld);
+            $self->log->notice("signal $sig received");
+            $self->log->notice("sending $sig to", @chld);
             kill $sig, @chld;
         };
     }
