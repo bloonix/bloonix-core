@@ -2,6 +2,7 @@ bloonix-core (0.16) released at 2015-03-21
 
     * Added new core modules.
     * Bug fixed in Dispatcher.pm with finished objects.
+    * Added a limitation for max slots in IPC::SharedFile.
 
 bloonix-core (0.15) released at 2015-03-09
 
