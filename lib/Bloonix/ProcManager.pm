@@ -148,14 +148,14 @@ sub set_child_sigs {
 
     foreach my $sig (qw/HUP INT TERM PIPE/) {
         $SIG{$sig} = sub {
-            $self->log->warning("signal $sig received");
+            $self->log->notice("signal $sig received");
             $self->done(1);
         };
     }
 
     foreach my $sig (qw/USR1 USR2/) {
         $SIG{$sig} = sub {
-            $self->log->warning("signal $sig received - ignoring");
+            $self->log->notice("signal $sig received - ignoring");
         };
     }
 }
