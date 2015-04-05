@@ -10,10 +10,8 @@ use POSIX qw(:sys_wait_h);
 use Sys::Hostname qw();
 use Time::HiRes qw();
 
-use constant PARENT_PID => $$;
-
 use base qw(Bloonix::Accessor);
-__PACKAGE__->mk_accessors(qw/children done hostname ipc json kill_procs log next_kill reload request socket to_reap/);
+__PACKAGE__->mk_accessors(qw/children done hostname ipc json kill_procs log next_kill parent_pid reload request socket to_reap/);
 __PACKAGE__->mk_counters(qw/ttlreq/);
 
 our $VERSION = "0.1";
@@ -41,6 +39,7 @@ sub new {
 sub init {
     my $self = shift;
 
+    $self->parent_pid($$);
     $self->log(Log::Handler->get_logger("bloonix"));
     $self->ipc(Bloonix::IPC::SharedFile->new($self->{max_servers}, $self->{lockfile}));
     $self->done(0);
@@ -558,8 +557,9 @@ sub validate {
 }
 
 sub DESTROY {
-    if ($$ == PARENT_PID) {
-        my $self = shift;
+    my $self = shift;
+
+    if ($$ == $self->{parent_pid}) {
         if ($self->{socket}) {
             my $socket = $self->{socket};
             close $socket;

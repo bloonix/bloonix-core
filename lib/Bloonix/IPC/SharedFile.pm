@@ -4,7 +4,6 @@ use strict;
 use warnings;
 use Fcntl qw( O_CREAT O_RDWR :flock );
 
-use constant PARENT_PID => $$;
 use constant RECVBUF => 16384;
 
 sub new {
@@ -15,16 +14,17 @@ sub new {
         die "too much slots configured, only 10000 slots are allowed";
     }
 
+    $self->{parent_pid} = $$;
     $self->{free_slots} = [ 0 .. $slots - 1 ];
     $self->{used_slots} = { };
     $self->{slot_size}  = 1024;
     $self->{slot_count} = $slots;
 
     if ($lockfile) {
-        my $pid_and_time = PARENT_PID .".". time;
+        my $pid_and_time = $self->{parent_pid} .".". time;
         $lockfile =~ s/%P/$pid_and_time/g;
     } else {
-        $lockfile ||= join(".", "/var/run/blxipc", PARENT_PID, time, "lock");
+        $lockfile ||= join(".", "/var/run/blxipc", $self->{parent_pid}, time, "lock");
     }
 
     if (-e $lockfile) {
@@ -322,8 +322,8 @@ sub destroy {
 }
 
 sub DESTROY {
-    if ($$ == PARENT_PID) {
-        my $self = shift;
+    my $self = shift;
+    if ($$ == $self->{parent_pid}) {
         unlink($self->{lockfile});
     }
 }

@@ -220,6 +220,7 @@ sub send {
     $self->log->debug("pack data");
     $data = pack("N/a*", $data);
     $self->log->debug("send data");
+    $data = "00" . $data;
 
     eval {
         local $SIG{__DIE__} = $self->die_sub;
@@ -261,11 +262,20 @@ sub _recv_data {
     my $self = shift;
     my $maxbyt = $self->{revc_max_bytes};
 
-    $self->log->debug("recv 4 bytes");
+    # This 2 bytes are reserved for data options like
+    # compression, encryption and so on...
+    $self->log->info("recv 2 bytes (opts)");
+    my $opts = $self->_recv(2);
+
+    if (!defined $opts) {
+        die "no 2 bytes received (opts)";
+    }
+
+    $self->log->info("recv 4 bytes (length)");
     my $length = $self->_recv(4);
 
     if (!defined $length) {
-        die "no 4 bytes received";
+        die "no 4 bytes received (length)";
     }
 
     $length = unpack("N", $length);
@@ -447,7 +457,7 @@ sub validate {
         ssl_verify_mode => {
             type => Params::Validate::SCALAR,
             regex => qr/^(0|none|1|peer)\z/,
-            optional => 1
+            default => "peer"
         },
         recv_max_bytes => {
             type => Params::Validate::SCALAR,
@@ -498,7 +508,7 @@ sub validate {
             type => Params::Validate::SCALAR,
             regex => qr/^(0|1|no|yes)\z/,
             default => "yes"
-        },
+        }
     });
 
     foreach my $key (qw/listen use_ssl auto_connect force_ipv4/) {
@@ -595,7 +605,7 @@ sub validate {
         );
 
         while (my ($opt, $modopt) = each %sslopts) {
-            if ($opts{$opt}) {
+            if (defined $opts{$opt}) {
                 $opts{sockopts}{$modopt} = $opts{$opt};
             }
         }

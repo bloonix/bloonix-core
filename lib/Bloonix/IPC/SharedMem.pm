@@ -6,8 +6,6 @@ use Fcntl qw(O_CREAT O_RDWR :flock);
 use IPC::SysV qw(IPC_PRIVATE S_IRWXU);
 use IPC::SharedMem;
 
-use constant PARENT_PID => $$;
-
 # Process status:
 #
 # "_" Waiting for Connection
@@ -22,16 +20,17 @@ sub new {
     my ($class, $slots, $lockfile) = @_;
     my $self = bless { }, $class;
 
+    $self->{parent_pid} = $$;
     $self->{free_slots} = [ 0 .. $slots - 1 ];
     $self->{used_slots} = { };
     $self->{slot_size}  = 1024;
     $self->{slot_count} = $slots;
 
     if ($lockfile) {
-        my $pid_and_time = PARENT_PID .".". time;
+        my $pid_and_time = $self->{parent_pid} .".". time;
         $lockfile =~ s/%P/$pid_and_time/g;
     } else {
-        $lockfile ||= join(".", "/var/run/blxipc", PARENT_PID, time, "tab");
+        $lockfile ||= join(".", "/var/run/blxipc", $self->{parent_pid}, time, "tab");
     }
 
     if (-e $lockfile) {
@@ -276,8 +275,8 @@ sub destroy {
 }
 
 sub DESTROY {
-    if ($$ == PARENT_PID) {
-        my $self = shift;
+    my $self = shift;
+    if ($$ == $self->{parent_pid}) {
         if ($self->{shm}) {
             $self->{shm}->remove;
         }
