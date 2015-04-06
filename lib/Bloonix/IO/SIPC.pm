@@ -264,14 +264,14 @@ sub _recv_data {
 
     # This 2 bytes are reserved for data options like
     # compression, encryption and so on...
-    $self->log->info("recv 2 bytes (opts)");
+    $self->log->debug("recv 2 bytes (opts)");
     my $opts = $self->_recv(2);
 
     if (!defined $opts) {
         die "no 2 bytes received (opts)";
     }
 
-    $self->log->info("recv 4 bytes (length)");
+    $self->log->debug("recv 4 bytes (length)");
     my $length = $self->_recv(4);
 
     if (!defined $length) {
