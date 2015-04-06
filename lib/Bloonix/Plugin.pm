@@ -1671,7 +1671,6 @@ sub start_snmp_session {
 
     my %opts = (
         -hostname => $self->option->{host},
-        -community => $self->option->{community},
         -version => $self->option->{snmp_version},
         -port => $self->option->{port},
         -timeout => $self->{snmp_timeout}
@@ -1685,13 +1684,13 @@ sub start_snmp_session {
             );
         }
 
-        $opts{"-username"} = $self->option->{username};
-
-        foreach my $key (qw/authpassword authprotocol privpassword privprotocol/) {
+        foreach my $key (qw/username authkey authpassword authprotocol privkey privpassword privprotocol/) {
             if ($self->option->{$key}) {
-                $opts{"-$key"} = $self->option->{username};
+                $opts{"-$key"} = $self->option->{$key};
             }
         }
+    } else {
+        $opts{"-community"} = $self->option->{community};
     }
 
     my ($snmp, $error) = Net::SNMP->session(%opts);
@@ -1716,8 +1715,10 @@ sub has_snmp {
     $self->has_snmp_community(default => $opts{community} || "public");
     $self->has_snmp_version(default => $opts{community} || 2);
     $self->has_snmp_username;
+    $self->has_snmp_authkey;
     $self->has_snmp_authpassword;
     $self->has_snmp_authprotocol;
+    $self->has_snmp_privkey;
     $self->has_snmp_privpassword;
     $self->has_snmp_privprotocol;
     $self->{snmp_timeout} = $opts{timeout} || 15;
@@ -1767,6 +1768,19 @@ sub has_snmp_username {
     );
 }
 
+sub has_snmp_authkey {
+    my ($self, %opts) = @_;
+
+    $self->add_option(
+        name => "SNMPv3 auth key",
+        option => "authkey",
+        value => "authkey",
+        value_type => "string",
+        description => "The SNMPv3 auth key.",
+        %opts
+    );
+}
+
 sub has_snmp_authpassword {
     my ($self, %opts) = @_;
 
@@ -1776,6 +1790,19 @@ sub has_snmp_authpassword {
         value => "authpassword",
         value_type => "string",
         description => "The SNMPv3 auth password.",
+        %opts
+    );
+}
+
+sub has_snmp_privkey {
+    my ($self, %opts) = @_;
+
+    $self->add_option(
+        name => "SNMPv3 priv key",
+        option => "privkey",
+        value => "privkey",
+        value_type => "string",
+        description => "The SNMPv3 priv key.",
         %opts
     );
 }

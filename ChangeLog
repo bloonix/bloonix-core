@@ -1,3 +1,7 @@
+bloonix-core (0.17) released at 2015-04-06
+
+    * Fixed snmp options in Bloonix::Plugin.
+
 bloonix-core (0.16) released at 2015-03-21
 
     * Added new core modules.
