@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.16
+Version: 0.17
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -61,6 +61,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Mon Apr 06 2015 Jonny Schulz <js@bloonix.de> - 0.17-1
+- Fixed snmp options in Bloonix::Plugin.
 * Sat Mar 21 2015 Jonny Schulz <js@bloonix.de> - 0.16-1
 - Added new core modules.
 - Bug fixed in Dispatcher.pm with finished objects.
