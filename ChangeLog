@@ -1,3 +1,7 @@
+bloonix-core (0.18) released at 2015-04-14
+
+    * Added parameter ssl_hostname to Bloonix::IO::SIPC.
+
 bloonix-core (0.17) released at 2015-04-06
 
     * Fixed snmp options in Bloonix::Plugin.
