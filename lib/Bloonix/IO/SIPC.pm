@@ -138,6 +138,7 @@ sub connect {
                 }
             }
         } else {
+            # a listen socket
             if ($timeout) {
                 alarm($timeout);
             }
@@ -152,7 +153,6 @@ sub connect {
     };
 
     if ($@) {
-        #$self->log->dump(error => $opts);
         $self->_sock_error($@);
         die $self->errstr;
     }
@@ -465,7 +465,7 @@ sub validate {
         },
         ssl_verifycn_scheme => {
             type => Params::Validate::SCALAR,
-            default => "http"
+            optional => 1
         },
         recv_max_bytes => {
             type => Params::Validate::SCALAR,
@@ -539,6 +539,10 @@ sub validate {
         } else {
             $opts{peerport} = delete $opts{port};
         }
+    }
+
+    if (!$opts{listen} && !$opts{ssl_verifycn_scheme}) {
+        $opts{ssl_verifycn_scheme} = "http";
     }
 
     if ($opts{force_ipv4}) {
