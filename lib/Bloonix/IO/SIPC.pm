@@ -459,9 +459,13 @@ sub validate {
             regex => qr/^(0|none|1|peer)\z/,
             default => "peer"
         },
-        ssl_hostname => {
+        ssl_verifycn_name => {
             type => Params::Validate::SCALAR,
             optional => 1
+        },
+        ssl_verifycn_scheme => {
+            type => Params::Validate::SCALAR,
+            default => "http"
         },
         recv_max_bytes => {
             type => Params::Validate::SCALAR,
@@ -606,7 +610,8 @@ sub validate {
             ssl_cert_file => "SSL_cert_file",
             ssl_key_file => "SSL_key_file",
             ssl_verify_mode => "SSL_verify_mode",
-            ssl_hostname => "SSL_hostname"
+            ssl_verifycn_name => "SSL_verifycn_name",
+            ssl_verifycn_scheme => "SSL_verifycn_scheme"
         );
 
         while (my ($opt, $modopt) = each %sslopts) {
