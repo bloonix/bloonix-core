@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.17
+Version: 0.18
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -62,6 +62,9 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Thu Apr 16 2015 Jonny Schulz <js@bloonix.de> - 0.18-1
+- Added parameter ssl_verifycn_name and ssl_verifycn_name
+  to Bloonix::IO::SIPC.
 * Mon Apr 06 2015 Jonny Schulz <js@bloonix.de> - 0.17-1
 - Fixed snmp options in Bloonix::Plugin.
 * Sat Mar 21 2015 Jonny Schulz <js@bloonix.de> - 0.16-1
