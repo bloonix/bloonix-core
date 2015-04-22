@@ -65,6 +65,7 @@ rm -rf %{buildroot}
 * Wed Apr 22 2015 Jonny Schulz <js@bloonix.de> - 0.19-1
 - Bloonix::Plugin: Improved parsing of multiple parameters and now
   an error is thrown if invalid characters are used.
+- Bloonix::Plugin: kicked value type hash and array.
 * Thu Apr 16 2015 Jonny Schulz <js@bloonix.de> - 0.18-1
 - Added parameter ssl_verifycn_name and ssl_verifycn_name
   to Bloonix::IO::SIPC.
