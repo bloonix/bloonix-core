@@ -345,6 +345,9 @@ sub one_must_have_options {
 sub check_options {
     my $self = shift;
 
+    # If a multiple option is mixed with the value types hash or array,
+    # then each value must be an hash or array.
+
     foreach my $_option ($self->get_options) {
         my $option = $self->get_option($_option);
         my $value = $self->option->{$_option};
