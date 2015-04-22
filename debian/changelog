@@ -1,3 +1,10 @@
+bloonix-core (0.19-1) unstable; urgency=low
+
+    * Bloonix::Plugin: Improved parsing of multiple parameters and now
+      an error is thrown if invalid characters are used.
+
+ -- Jonny Schulz <js@bloonix.de>  Wed, 22 Apr 2015 21:55:45 +0200
+
 bloonix-core (0.18-1) unstable; urgency=low
 
     * Added parameter ssl_verifycn_name and ssl_verifycn_name
