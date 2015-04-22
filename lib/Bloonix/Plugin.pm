@@ -336,11 +336,6 @@ sub check_options {
         my $value = $self->option->{$_option};
         my $value_type = $option->{value_type} || "none";
 
-        # Remove not allowed characters!
-        if (defined $value) {
-            $value =~ s/[`'\\]//g;
-        }
-
         if ($option->{mandatory} && (!defined $value || (ref $value eq "ARRAY" && !@$value)) && (!$self->{has_list_objects} || !$self->option->{list})) {
             $self->exit(
                 status => "UNKNOWN",
@@ -362,39 +357,44 @@ sub check_options {
             );
         }
 
-        if (defined $value && (
-            ($value_type eq "int" && $value !~ /^\d+\z/)
-            || ($value_type eq "number" && $value !~ /^[1-9]\d*\z/)
-            || ($value_type eq "array" && ref $value ne "ARRAY")
-            || ($value_type eq "hash" && ref $value ne "HASH")
-        )) {
-            $self->exit(
-                status => "UNKNOWN",
-                message => "Invalid value '$value' for option '$_option'"
-            );
-        }
+        my $vopts = $option->{multiple} ? $value : [ $value ];
 
-        if (defined $value && $option->{prepare}) {
-            $option->{prepare}($value);
-            $self->option->{$_option} = $value;
-        }
+        foreach my $v (@$vopts) {
+            next unless defined $v;
 
-        if ($option->{regex} && defined $value) {
-            if (ref $value eq "ARRAY") {
-                foreach my $item (@$value) {
-                    if (!$self->_check_option_by_regex($item => $option->{regex})) {
-                        $self->exit(
-                            status => "UNKNOWN",
-                            message => "Invalid value '$item' for option '$option->{option}'"
-                        );
-                    }
-                }
-            } elsif (!$self->_check_option_by_regex($value => $option->{regex})) {
+            if ($v =~ /[`']/) {
                 $self->exit(
                     status => "UNKNOWN",
-                    message => "Invalid value '$value' for option '$option->{option}'"
+                    message => "Invalid characters found for option '$_option'. Not allowed characters are apostrophes and backticks."
                 );
             }
+
+            if (
+                ($value_type eq "int" && $v !~ /^\d+\z/)
+                || ($value_type eq "number" && $v !~ /^[1-9]\d*\z/)
+                || ($value_type eq "array" && ref $v ne "ARRAY")
+                || ($value_type eq "hash" && ref $v ne "HASH")
+            ) {
+                $self->exit(
+                    status => "UNKNOWN",
+                    message => "Invalid value '$v' for option '$_option'"
+                );
+            }
+
+            if ($option->{prepare}) {
+                $option->{prepare}($v);
+            }
+
+            if ($option->{regex} && !$self->_check_option_by_regex($v => $option->{regex})) {
+                $self->exit(
+                    status => "UNKNOWN",
+                    message => "Invalid value '$v' for option '$option->{option}'"
+                );
+            }
+        }
+
+        if ($option->{prepare} && !$option->{multiple}) {
+            $self->option->{$_option} = $vopts->[0];
         }
     }
 
