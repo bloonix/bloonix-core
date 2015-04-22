@@ -57,6 +57,11 @@ sub add_option {
 
     if (!defined $opts{value_type} || $opts{value_type} eq "none") {
         $opts{value_type} = 0;
+    } elsif ($opts{value_type} !~ /^(int|number|string|hash|array)\z/) {
+        $self->exit(
+            status => "UNKNOWN",
+            message => "invalid value type '$opts{value_type}'"
+        );
     }
 
     foreach my $opt (qw/option description/) {
@@ -296,15 +301,26 @@ sub parse_command_line_arguments {
                     status => "UNKNOWN",
                     message => "Missing value for option '$option'"
                 );
-            } elsif (
+            }
+
+            if ($value_type =~ /^(array|hash)\z/) {
+                eval { $value = JSON->new->decode($value) };
+                # checking $@ is not necessary, the value_type is
+                # checked further down (ref $value ...).
+            }
+
+            if (
                 ($value_type eq "int" && $value !~ /^\d+\z/)
                 || ($value_type eq "number" && $value !~ /^[1-9]\d*\z/)
+                || ($value_type eq "array" && ref $value ne "ARRAY")
+                || ($value_type eq "hash" && ref $value ne "HASH")
             ) {
                 $self->exit(
                     status => "UNKNOWN",
                     message => "Invalid value '$value' for option '$option'"
                 );
             }
+
             if (ref $self->option->{$_option} eq "ARRAY") {
                 if (!$self->{parsed}->{$_option}) {
                     @{$self->option->{$_option}} = ();
@@ -348,7 +364,7 @@ sub check_options {
             );
         }
 
-        if (!$option->{multiple} && ref $value) {
+        if (!$option->{multiple} && (ref $value && $option->{value_type} !~ /^(array|hash)\z/)) {
             $self->exit(
                 status => "UNKNOWN",
                 message => "option '$_option' must be a string and not a reference"
@@ -370,6 +386,8 @@ sub check_options {
             if (
                 ($value_type eq "int" && $v !~ /^\d+\z/)
                 || ($value_type eq "number" && $v !~ /^[1-9]\d*\z/)
+                || ($value_type eq "array" && ref $v ne "ARRAY")
+                || ($value_type eq "hash" && ref $v ne "HASH")
             ) {
                 $self->exit(
                     status => "UNKNOWN",
