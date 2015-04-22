@@ -2,6 +2,7 @@ bloonix-core (0.19) released at 2015-04-22
 
     * Bloonix::Plugin: Improved parsing of multiple parameters and now
       an error is thrown if invalid characters are used.
+    * Bloonix::Plugin: kicked value type hash and array.
 
 bloonix-core (0.18) released at 2015-04-14
 
