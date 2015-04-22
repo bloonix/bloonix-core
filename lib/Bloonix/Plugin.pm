@@ -299,8 +299,6 @@ sub parse_command_line_arguments {
             } elsif (
                 ($value_type eq "int" && $value !~ /^\d+\z/)
                 || ($value_type eq "number" && $value !~ /^[1-9]\d*\z/)
-                || ($value_type eq "array" && ref $value ne "ARRAY")
-                || ($value_type eq "hash" && ref $value ne "HASH")
             ) {
                 $self->exit(
                     status => "UNKNOWN",
@@ -346,11 +344,11 @@ sub check_options {
         if ($option->{multiple} && ref $value ne "ARRAY") {
             $self->exit(
                 status => "UNKNOWN",
-                message => "option '$_option' must be an array reference"
+                message => "option '$_option' must be an array"
             );
         }
 
-        if (!$option->{multiple} && (ref $value && $option->{value_type} !~ /^(array|hash)\z/)) {
+        if (!$option->{multiple} && ref $value) {
             $self->exit(
                 status => "UNKNOWN",
                 message => "option '$_option' must be a string and not a reference"
@@ -372,8 +370,6 @@ sub check_options {
             if (
                 ($value_type eq "int" && $v !~ /^\d+\z/)
                 || ($value_type eq "number" && $v !~ /^[1-9]\d*\z/)
-                || ($value_type eq "array" && ref $v ne "ARRAY")
-                || ($value_type eq "hash" && ref $v ne "HASH")
             ) {
                 $self->exit(
                     status => "UNKNOWN",
