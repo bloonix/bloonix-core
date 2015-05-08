@@ -213,6 +213,8 @@ sub request {
     $self->_serialize_data($opts);
     $self->_process_path($opts);
 
+    my $req_opts = $self->_get_req_opts($opts);
+
     while ($count--) {
         my $uri = $uris->[0];
 
@@ -225,7 +227,7 @@ sub request {
         my $res = $self->http->request(
             $method,
             "$uri/$opts->{path}",
-            $self->_get_req_opts($opts)
+            $req_opts
         );
 
         if ($res->{success}) {
