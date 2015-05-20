@@ -11,7 +11,7 @@
 
     my $dispatcher = Bloonix::Dispatcher->new(
         worker => 1,
-        sock_file => "/tmp/bloonix-location-agent.sock"
+        sock_file => "/tmp/bloonix-dispatcher.sock"
     );
 
     $dispatcher->on(ready => sub {
