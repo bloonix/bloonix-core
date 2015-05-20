@@ -295,14 +295,6 @@ sub _recv_data {
     return ($data, $length);
 }
 
-sub DESTROY {
-    my $self = shift;
-
-    if ($self->sock) {
-        close $self->sock;
-    }
-}
-
 #
 # private stuff
 #
