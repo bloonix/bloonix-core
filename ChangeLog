@@ -1,6 +1,7 @@
 bloonix-core (0.20) released at 2015-XX-XX
 
     * Kicked DESTROY from Bloonix::IO::SIPC.
+    * Fixed path detection in Bloonix::Config for Windows systems.
 
 bloonix-core (0.19) released at 2015-04-22
 

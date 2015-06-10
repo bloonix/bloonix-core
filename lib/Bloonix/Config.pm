@@ -253,7 +253,7 @@ sub _add_key_value {
     my ($self, $config, $key, $value) = @_;
 
     if ($key eq "include") {
-        if ($self->{path} && $value !~ m!^(/|[a-z]:\\)!i) {
+        if ($self->{path} && $value !~ m!^(/|[a-z]:[/\\])!i) {
             $value = join(DIRDELIM, $self->{path}, $value);
         }
         $self->_include_config($value, $config);

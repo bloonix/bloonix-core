@@ -356,7 +356,7 @@ sub manage_objects {
         # Print the object configuration to the worker.
         print $client $self->json->encode({ job => $object }), "\n";
         close $client;
-        $self->log->info("object send sent to child $pid");
+        $self->log->info("object sent to child $pid");
     }
 
     if ($self->on_quit) {

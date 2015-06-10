@@ -65,7 +65,7 @@ use Log::Handler;
 use Params::Validate qw//;
 
 use base qw(Bloonix::Accessor);
-__PACKAGE__->mk_accessors(qw/log recvbuf die_sub alrm_sub sock errstr json/);
+__PACKAGE__->mk_accessors(qw/log recvbuf die_sub alrm_conn_sub alrm_send_sub alrm_recv_sub sock errstr json/);
 
 our $VERSION = "0.1";
 
@@ -97,7 +97,9 @@ sub init {
     }
 
     $self->die_sub(sub { alarm(0) });
-    $self->alrm_sub(sub { die "connect runs on a timeout" });
+    $self->alrm_conn_sub(sub { die "connect() runs on a timeout" });
+    $self->alrm_send_sub(sub { die "send() runs on a timeout" });
+    $self->alrm_recv_sub(sub { die "recv() runs on a timeout" });
 }
 
 sub connect {
@@ -107,7 +109,7 @@ sub connect {
 
     eval {
         local $SIG{__DIE__} = $self->die_sub;
-        local $SIG{ALRM} = $self->alrm_sub;
+        local $SIG{ALRM} = $self->alrm_conn_sub;
 
         if ($self->{peeraddr}) {
             my $peers = $self->{peeraddr};
@@ -224,7 +226,7 @@ sub send {
 
     eval {
         local $SIG{__DIE__} = $self->die_sub;
-        local $SIG{ALRM} = $self->alrm_sub;
+        local $SIG{ALRM} = $self->alrm_send_sub;
         alarm($self->{send_timeout});
         $ret = $self->_send($data);
         alarm(0);
@@ -244,7 +246,7 @@ sub recv {
 
     eval {
         local $SIG{__DIE__} = $self->die_sub;
-        local $SIG{ALRM} = $self->alrm_sub;
+        local $SIG{ALRM} = $self->alrm_recv_sub;
         alarm($self->{recv_timeout});
         ($data, $length) = $self->_recv_data(@_);
         alarm(0);
