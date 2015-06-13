@@ -230,7 +230,7 @@ sub _run_win32 {
     }
 
     if ($timeout < 1) {
-        $self->{timeout} = "the check runs on a timeout after $args->{timeout} seconds";
+        $self->{timeout} = "the command runs on a timeout after $args->{timeout} seconds";
     }
 
     if ($pid) {
