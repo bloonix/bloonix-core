@@ -118,6 +118,8 @@ sub run {
         $self->_run($args);
     }
 
+    $self->_run($args);
+
     return $self;
 }
 
@@ -167,15 +169,13 @@ sub _run_win32 {
     }
 
     eval {
-        local (*blx_in_r, *blx_in_w);
+        my $chld_in  = Symbol::gensym();
         local (*blx_out_r, *blx_out_w);
         local (*blx_err_r, *blx_err_w);
 
-        my ($chld_in_r, $chld_in_w) = (\*blx_in_r, \*blx_in_w);
         my ($chld_out_r, $chld_out_w) = (\*blx_out_r, \*blx_out_w);
         my ($chld_err_r, $chld_err_w) = (\*blx_err_r, \*blx_err_w);
 
-        socketpair($chld_in_r,  $chld_in_w,  AF_UNIX, SOCK_STREAM, PF_UNSPEC) or die $!;
         socketpair($chld_out_r, $chld_out_w, AF_UNIX, SOCK_STREAM, PF_UNSPEC) or die $!;
         socketpair($chld_err_r, $chld_err_w, AF_UNIX, SOCK_STREAM, PF_UNSPEC) or die $!;
 
@@ -183,8 +183,13 @@ sub _run_win32 {
 
         $timeout = $args->{timeout};
         $time = time + $args->{timeout};
-        $pid = open3('>&blx_in_r', '<&blx_out_w', '<&blx_err_w', $command);
-        close $chld_in_r;
+
+        $pid = open3($chld_in, '<&blx_out_w', '<&blx_err_w', $command);
+
+        if ($args->{to_stdin}) {
+            print $chld_in $args->{to_stdin}, "\n";
+        }
+
         close $chld_out_w;
         close $chld_err_w;
 
@@ -219,7 +224,6 @@ sub _run_win32 {
             $timeout = $time - time;
         }
 
-        close $chld_in_w;
         close $chld_out_r;
         close $chld_err_r;
     };
