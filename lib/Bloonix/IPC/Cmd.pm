@@ -118,7 +118,7 @@ sub run {
         $self->_run($args);
     }
 
-    $self->_run($args);
+    $self->_split_output;
 
     return $self;
 }
@@ -249,14 +249,6 @@ sub _run_win32 {
             $self->{exitcode} = $? >> 8;
         }
     }
-
-    foreach my $std (qw/stdout stderr/) {
-        if ($self->{$std}) {
-            $self->{$std} = [ split /\n/, $self->{$std} ];
-        } else {
-            $self->{$std} = [ ];
-        }
-    }
 }
 
 sub _run {
@@ -356,14 +348,6 @@ sub _run {
         }
     }
 
-    foreach my $std (qw/stdout stderr/) {
-        if ($self->{$std}) {
-            $self->{$std} = [ split /\n/, $self->{$std} ];
-        } else {
-            $self->{$std} = [ ];
-        }
-    }
-
     if ($error) {
         if ($error =~ /^timeout/) {
             $self->{timeout} = "command runs on a timeout after $args->{timeout} seconds";
@@ -375,6 +359,20 @@ sub _run {
     # closing stdout and stderr
     close $chld_out;
     close $chld_err;
+}
+
+sub _split_output {
+    my $self = shift;
+
+    foreach my $std (qw/stdout stderr/) {
+        if ($self->{$std}) {
+            $self->{$std} = IS_WIN32
+                ? [ split /[\r\n]{1,2}/, $self->{$std} ]
+                : [ split /\n/, $self->{$std} ];
+        } else {
+            $self->{$std} = [ ];
+        }
+    }
 }
 
 sub _validate {
