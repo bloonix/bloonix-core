@@ -1,7 +1,9 @@
-bloonix-core (0.20) released at 2015-XX-XX
+bloonix-core (0.20) released at 2015-06-16
 
     * Kicked DESTROY from Bloonix::IO::SIPC.
     * Fixed path detection in Bloonix::Config for Windows systems.
+    * Bloonix::Plugin now passes the options --bloonix-host-id and
+      --bloonix-service-id to each check.
 
 bloonix-core (0.19) released at 2015-04-22
 

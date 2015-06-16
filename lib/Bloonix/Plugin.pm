@@ -8,7 +8,7 @@ use Bloonix::IPC::Cmd;
 use base qw(Bloonix::Accessor);
 
 __PACKAGE__->mk_accessors(qw/json progname shortname version options option options_order flags/);
-__PACKAGE__->mk_accessors(qw/plugin_libdir host_id service_id libfile config_path ip_version/);
+__PACKAGE__->mk_accessors(qw/plugin_libdir config_path ip_version/);
 
 sub new {
     my ($class, %opts) = @_;
@@ -30,26 +30,31 @@ sub new {
     $self->{progname} = do { $0 =~ m!([^/\\]+)\z!; $1 };
     $self->{shortname} = do { $self->progname =~ /^([\w\-]+)/; $1 };
     $self->{plugin_libdir} = $ENV{PLUGIN_LIBDIR} || "/tmp";
-    $self->{host_id} = $ENV{CHECK_HOST_ID} || 0;
-    $self->{service_id} = $ENV{CHECK_SERVICE_ID} || 0;
     $self->{config_path} = $ENV{CONFIG_PATH} || "/etc/bloonix/agent";
     $self->{flags} = "";
-
-    $self->{libfile} = join("-",
-        "bloonix",
-        $self->shortname,
-        $self->host_id,
-        $self->service_id
-    );
-
-    $self->{libfile} = join("/",
-        $self->{plugin_libdir},
-        $self->{libfile}
-    );
-
-    $self->{libfile} .= ".json";
+    $self->{priv_options} = {};
 
     return $self;
+}
+
+sub libfile {
+    my $self = shift;
+
+    my $libfile = join("-",
+        "bloonix",
+        $self->shortname,
+        $self->option->{bloonix_host_id} || 0,
+        $self->option->{bloonix_service_id} || 0
+    );
+
+    $libfile = join("/",
+        $self->{plugin_libdir},
+        $libfile
+    );
+
+    $libfile .= ".json";
+
+    return $libfile;
 }
 
 sub add_option {
@@ -132,6 +137,50 @@ sub _add_default_options {
         description => "Suggest options for auto discovery.",
         command_line_only => 1
     );
+
+    $self->add_option(
+        name => "STDIN",
+        option => "stdin",
+        description => "Read options as json string from stdin.",
+        command_line_only => 1
+    );
+
+    $self->add_option(
+        name => "Plugin libdir",
+        option => "plugin-libdir",
+        value_desc => "path",
+        value_type => "string",
+        description => "The path to store temporary check data.",
+        command_line_only => 1
+    );
+
+    $self->add_option(
+        name => "Config path",
+        option => "config-path",
+        value_desc => "path",
+        value_type => "string",
+        description => "The base path to the config directory of the agent.",
+        command_line_only => 1
+    );
+
+    $self->add_option(
+        name => "Host ID",
+        option => "bloonix-host-id",
+        value_desc => "id",
+        value_type => "string",
+        regex => qr/^[a-z0-9\-\.]+\z/,
+        description => "The host ID of the check in the WebGUI.",
+        command_line_only => 1,
+    );
+
+    $self->add_option(
+        name => "Service ID",
+        option => "bloonix-service-id",
+        value_desc => "id",
+        value_type => "number",
+        description => "The service ID of the check in the WebGUI.",
+        command_line_only => 1
+    );
 }
 
 sub get_option {
@@ -175,16 +224,25 @@ sub parse_options {
         }
     }
 
-    if ($ARGV[0] && $ARGV[0] eq "--stdin") {
-        if ($ARGV[1] && $ARGV[1] eq "--pretty") {
-            $self->option->{pretty} = 1;
-        }
-        $self->parse_stdin_arguments;
-    } elsif ($ARGV[0] && $ARGV[0] =~ /^\s*{/) {
+    if ($ARGV[0] && $ARGV[0] =~ /^\s*{/) {
         $self->parse_json_arguments($ARGV[0]);
     } else {
         $self->parse_command_line_arguments;
+        if ($self->option->{stdin}) {
+            $self->parse_stdin_arguments;
+        }
     }
+
+    #if ($ARGV[0] && $ARGV[0] eq "--stdin") {
+    #    if ($ARGV[1] && $ARGV[1] eq "--pretty") {
+    #        $self->option->{pretty} = 1;
+    #    }
+    #    $self->parse_stdin_arguments;
+    #} elsif ($ARGV[0] && $ARGV[0] =~ /^\s*{/) {
+    #    $self->parse_json_arguments($ARGV[0]);
+    #} else {
+    #    $self->parse_command_line_arguments;
+    #}
 
     if ($self->option->{help}) {
         $self->print_help;
@@ -467,6 +525,11 @@ sub print_help {
 
     foreach my $_option ($self->get_options) {
         my $option = $self->get_option($_option);
+
+        if ($option->{internal_only}) {
+            next;
+        }
+
         print "--$option->{option}";
 
         if ($option->{value_desc}) {
@@ -659,7 +722,7 @@ sub print_plugin_info {
     foreach my $_option ($self->get_options) {
         my $option = $self->get_option($_option);
 
-        if ($option->{command_line_only}) {
+        if ($option->{command_line_only} || $option->{internal_only}) {
             next;
         }
 
@@ -1398,7 +1461,7 @@ sub has_warning {
     $self->add_option(
         name => "Warning threshold",
         option => "warning",
-        value => "seconds",
+        value_desc => "seconds",
         value_type => "number",
         description => "A value in seconds. When the check takes longer than this time then a warning status is triggered.",
         %opts
@@ -1411,7 +1474,7 @@ sub has_critical {
     $self->add_option(
         name => "Critical threshold",
         option => "critical",
-        value => "seconds",
+        value_desc => "seconds",
         value_type => "number",
         description => "A value in seconds. When the check takes longer than this time then a critical status is triggered.",
         %opts
@@ -1424,7 +1487,7 @@ sub has_timeout {
     $self->add_option(
         name => "Timeout",
         option => "timeout",
-        value => "seconds",
+        value_desc => "seconds",
         value_type => "number",
         description => "A timeout in seconds after its expiration the check is aborted and a critical status is triggered.",
         %opts
@@ -1437,7 +1500,7 @@ sub has_host {
     $self->add_option(
         name => "Hostname or IP address",
         option => "host",
-        value => "hostname or ip address",
+        value_desc => "hostname or ip address",
         value_type => "string",
         regex => qr/^[^\s]+\z/,
         description => "A hostname or IP address to connect to.",
@@ -1451,7 +1514,7 @@ sub has_port {
     $self->add_option(
         name => "Port number",
         option => "port",
-        value => "port",
+        value_desc => "port",
         value_type => "int",
         regex => qr/^(?:6553[0-5]|655[0-2][0-9]|65[0-4][0-9]{2}|6[0-4][0-9]{3}|[0-5]?[0-9]{4}|[0-9]{2,4}|[1-9])\z/,
         description => "A port number to connect to.",
@@ -1465,7 +1528,7 @@ sub has_bind {
     $self->add_option(
         name => "Bind to IP address",
         option => "bind",
-        value => "ipaddr",
+        value_desc => "ipaddr",
         value_type => "string",
         regex => qr/^[a-fA-F0-9\.:]+\z/,
         description => "A local IP address to bind to.",
@@ -1479,7 +1542,7 @@ sub has_url {
     $self->add_option(
         name => "URL",
         option => "url",
-        value => "url",
+        value_desc => "url",
         value_type => "string",
         prepare => sub {
             if ($_[0] =~ m@^https{0,1}://[^/]+\z@) {
@@ -1521,7 +1584,7 @@ sub has_auth_basic {
     $self->add_option(
         name => "Username",
         option => "username",
-        value => "username",
+        value_desc => "username",
         value_type => "string",
         regex => qr/^[^\s]+\z/,
         description => "A username for a HTTP Auth-Basic authentication.",
@@ -1531,7 +1594,7 @@ sub has_auth_basic {
     $self->add_option(
         name => "Password",
         option => "password",
-        value => "password",
+        value_desc => "password",
         value_type => "string",
         regex => qr/^[^\s]+\z/,
         description => "A password for a HTTP Auth-Basic authentication.",
@@ -1545,7 +1608,7 @@ sub has_login_username {
     $self->add_option(
         name => "Username",
         option => "username",
-        value => "username",
+        value_desc => "username",
         value_type => "string",
         regex => qr/^[^\s]+\z/,
         description => "The username to use for the login.",
@@ -1559,7 +1622,7 @@ sub has_login_password {
     $self->add_option(
         name => "Password",
         option => "password",
-        value => "password",
+        value_desc => "password",
         value_type => "string",
         regex => qr/^[^\s]+\z/,
         description => "The password for the user to login.",
@@ -1573,7 +1636,7 @@ sub has_database_name {
     $self->add_option(
         name => "Database",
         option => "database",
-        value => "database",
+        value_desc => "database",
         value_type => "string",
         regex => qr/^[^\s]+\z/,
         description => "Set the database to connect to.",
@@ -1587,7 +1650,7 @@ sub has_database_driver {
     $self->add_option(
         name => "Database driver",
         option => "driver",
-        value => "driver",
+        value_desc => "driver",
         value_type => "string",
         regex => qr/^[a-zA-Z0-9]+\z/,
         description => "Which perl DBD driver to use. Example: mysql, Pg, DB2 ...",
@@ -1603,7 +1666,7 @@ sub has_login_secret_file {
     $self->add_option(
         name => "Secret file",
         option => "secret-file",
-        value => "filename",
+        value_desc => "filename",
         value_type => "string",
         description => "This is the secret file with the username and password to connect to the service.",
         %opts
@@ -1640,7 +1703,7 @@ sub has_mailbox {
     $self->add_option(
         name => "Mailbox",
         option => "mailbox",
-        value => "mailbox",
+        value_desc => "mailbox",
         value_type => "string",
         regex => qr/^[a-zA-Z]+\z/,
         description => "The mailbox to query.",
@@ -1747,7 +1810,7 @@ sub has_snmp_community {
     $self->add_option(
         name => "SNMP community",
         option => "community",
-        value => "community",
+        value_desc => "community",
         value_type => "string",
         default => "public",
         regex => qr/^[^\s]+\z/,
@@ -1762,7 +1825,7 @@ sub has_snmp_version {
     $self->add_option(
         name => "SNMP version",
         option => "snmp-version",
-        value => "version",
+        value_desc => "version",
         value_type => "string",
         default => 2,
         regex => qr/^[123]\z/,
@@ -1777,7 +1840,7 @@ sub has_snmp_username {
     $self->add_option(
         name => "SNMPv3 username",
         option => "username",
-        value => "username",
+        value_desc => "username",
         value_type => "string",
         regex => qr/^.{0,32}\z/,
         description => "The SNMPv3 username.",
@@ -1791,7 +1854,7 @@ sub has_snmp_authkey {
     $self->add_option(
         name => "SNMPv3 auth key",
         option => "authkey",
-        value => "authkey",
+        value_desc => "authkey",
         value_type => "string",
         description => "The SNMPv3 auth key.",
         %opts
@@ -1804,7 +1867,7 @@ sub has_snmp_authpassword {
     $self->add_option(
         name => "SNMPv3 auth password",
         option => "authpassword",
-        value => "authpassword",
+        value_desc => "authpassword",
         value_type => "string",
         description => "The SNMPv3 auth password.",
         %opts
@@ -1817,7 +1880,7 @@ sub has_snmp_privkey {
     $self->add_option(
         name => "SNMPv3 priv key",
         option => "privkey",
-        value => "privkey",
+        value_desc => "privkey",
         value_type => "string",
         description => "The SNMPv3 priv key.",
         %opts
@@ -1830,7 +1893,7 @@ sub has_snmp_privpassword {
     $self->add_option(
         name => "SNMPv3 priv password",
         option => "privpassword",
-        value => "privpassword",
+        value_desc => "privpassword",
         value_type => "string",
         description => "The SNMPv3 priv password.",
         %opts
@@ -1843,7 +1906,7 @@ sub has_snmp_authprotocol {
     $self->add_option(
         name => "SNMPv3 auth protocol",
         option => "authprotocol",
-        value => "authprotocol",
+        value_desc => "authprotocol",
         value_type => "string",
         description => "The SNMPv3 auth protocol.",
         %opts
@@ -1856,7 +1919,7 @@ sub has_snmp_privprotocol {
     $self->add_option(
         name => "SNMPv3 priv protocol",
         option => "privprotocol",
-        value => "privprotocol",
+        value_desc => "privprotocol",
         value_type => "string",
         description => "The SNMPv3 priv protocol.",
         %opts
