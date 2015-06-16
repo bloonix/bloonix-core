@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.19
+Version: 0.20
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -62,6 +62,11 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Tue Jun 16 2015 Jonny Schulz <js@bloonix.de> - 0.20-1
+- Kicked DESTROY from Bloonix::IO::SIPC.
+- Fixed path detection in Bloonix::Config for Windows systems.
+- Bloonix::Plugin now passes the options --bloonix-host-id and
+  --bloonix-service-id to each check.
 * Wed Apr 22 2015 Jonny Schulz <js@bloonix.de> - 0.19-1
 - Bloonix::Plugin: Improved parsing of multiple parameters and now
   an error is thrown if invalid characters are used.
