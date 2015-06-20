@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.20
+Version: 0.21
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -62,6 +62,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Sat Jun 20 2015 Jonny Schulz <js@bloonix.de> - 0.21-1
+- Implemented feature start_servers in ProcManager.pm.
 * Tue Jun 16 2015 Jonny Schulz <js@bloonix.de> - 0.20-1
 - Kicked DESTROY from Bloonix::IO::SIPC.
 - Fixed path detection in Bloonix::Config for Windows systems.

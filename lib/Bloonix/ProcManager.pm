@@ -73,31 +73,20 @@ sub daemonize {
             $self->kill_procs(0);
 
             if ($total < $self->{max_servers}) {
-                my $to_spawn = $self->{min_spare_servers} - $idle;
-                $self->log->info("min_spare_servers reached - spawn $to_spawn processes");
-            
-                for (1 .. $to_spawn) {
-                    my $slot = $self->ipc->get_free_slot;
+                my $to_spawn;
 
-                    if (defined $slot) {
-                        my $pid = fork;
+                if ($self->{start_servers}) {
+                    $to_spawn = $self->{start_servers};
+                    $self->{start_servers} = 0;
+                    $self->log->info("spawn $to_spawn processes at program start");
+                } else {
+                    $to_spawn = $self->{min_spare_servers} - $idle;
+                    $self->log->info("min_spare_servers reached - spawn $to_spawn processes");
+                }
 
-                        if ($pid) {
-                            $self->log->info("spawn server process $pid - slot $slot");
-                            $self->log->info("ipc left slots:", $self->ipc->freeslots);
-                            $self->ipc->init_free_slot($slot => $pid);
-                            $self->children->{$pid} = $pid;
-                        } elsif (!defined $pid) {
-                            die "unable to fork() - $!";
-                        } else {
-                            $self->set_child_sigs;
-                            $self->ipc->locking(0);
-                            $self->ipc->wait_for_slot($slot => $$);
-                            return;
-                        }
-                    } else {
-                        $self->log->warning("no free slots available");
-                    }
+                if ($to_spawn && $self->spawn_process($to_spawn)) {
+                    # the child returns a pid
+                    return;
                 }
             } else {
                 $self->log->warning("max_servers of $self->{max_servers} reached");
@@ -111,6 +100,37 @@ sub daemonize {
     $self->stop_server;
     $self->ipc->destroy;
     exit 0;
+}
+
+sub spawn_process {
+    my ($self, $to_spawn) = @_;
+
+    for (1 .. $to_spawn) {
+        my $slot = $self->ipc->get_free_slot;
+
+        if (!defined $slot) {
+            $self->log->warning("no free slots available");
+            return 0;
+        }
+
+        my $pid = fork;
+
+        if ($pid) {
+            $self->log->info("spawn server process $pid - slot $slot");
+            $self->log->info("ipc left slots:", $self->ipc->freeslots);
+            $self->ipc->init_free_slot($slot => $pid);
+            $self->children->{$pid} = $pid;
+        } elsif (!defined $pid) {
+            die "unable to fork() - $!";
+        } else {
+            $self->set_child_sigs;
+            $self->ipc->locking(0);
+            $self->ipc->wait_for_slot($slot => $$);
+            return $$;
+        }
+    }
+
+    return 0;
 }
 
 sub set_parent_sigs {
@@ -525,6 +545,11 @@ sub validate {
             regex => qr/^(\d+\s*(M|G)B{0,1}|0)\z/i,
             default => "1GB"
         },
+        start_servers => {
+            type  => Params::Validate::SCALAR,
+            regex => qr/^\d+\z/,
+            default => 0
+        },
         auto_check_process_size => {
             type => Params::Validate::SCALAR,
             regex => qr/^(0|1|no|yes)\z/,
@@ -540,6 +565,10 @@ sub validate {
             default => "/var/lib/bloonix/ipc/%P.lock"
         }
     });
+
+    if ($options{start_servers} > $options{max_servers}) {
+        die "ERR: start_servers cannot be higher than max_servers";
+    }
 
     if ($options{auto_check_process_size} eq "no") {
         $options{auto_check_process_size} = 0;

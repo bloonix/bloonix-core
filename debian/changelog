@@ -1,3 +1,9 @@
+bloonix-core (0.21-1) unstable; urgency=low
+
+    * Implemented feature start_servers in ProcManager.pm.
+
+ -- Jonny Schulz <js@bloonix.de>  Sat, 20 Jun 2015 21:50:19 +0200
+
 bloonix-core (0.20-1) unstable; urgency=low
 
     * Kicked DESTROY from Bloonix::IO::SIPC.
