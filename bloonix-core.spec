@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.21
+Version: 0.22
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -62,6 +62,9 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Mon Jun 22 2015 Jonny Schulz <js@bloonix.de> - 0.22-1
+- Set a default value for bloonix_host_id and bloonix_service_id
+  in Bloonix::Plugin.
 * Sat Jun 20 2015 Jonny Schulz <js@bloonix.de> - 0.21-1
 - Implemented feature start_servers in ProcManager.pm.
 * Tue Jun 16 2015 Jonny Schulz <js@bloonix.de> - 0.20-1

@@ -269,6 +269,14 @@ sub parse_options {
         }
     }
 
+    if (!defined $self->option->{bloonix_host_id}) {
+        $self->option->{bloonix_host_id} = 0;
+    }
+
+    if (!defined $self->option->{bloonix_service_id}) {
+        $self->option->{bloonix_service_id} = 0;
+    }
+
     return $self->option;
 }
 
