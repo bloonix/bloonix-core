@@ -33,7 +33,7 @@ Jonny Schulz <support(at)bloonix.de>.
 
 =head1 COPYRIGHT
 
-Copyright (C) 2009-2014 by Jonny Schulz. All rights reserved.
+Copyright (C) 2009 by Jonny Schulz. All rights reserved.
 
 =cut
 
@@ -42,6 +42,7 @@ package Bloonix::Accessor;
 use strict;
 use warnings;
 use Bloonix::Accessor::Array;
+use Bloonix::Accessor::Hash;
 
 sub mk_accessors {
     my ($class, @accessors) = @_;
@@ -69,7 +70,7 @@ sub mk_counters {
     }
 }
 
-sub mk_arrays {
+sub mk_array_accessors {
     my ($class, @accessors) = @_;
 
     foreach my $accessor (@accessors) {
@@ -83,7 +84,7 @@ sub mk_arrays {
     }
 }
 
-sub mk_hashs {
+sub mk_hash_accessors {
     my ($class, @accessors) = @_;
 
     foreach my $accessor (@accessors) {
