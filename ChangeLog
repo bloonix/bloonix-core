@@ -1,7 +1,7 @@
 bloonix-core (0.23) released at 2015-08-06
 
     * Bloonix::Accessors: Renamed mk_arrays to mk_array_accessor
-        and mk_hashs to mk_hash_accessor.
+      and mk_hashs to mk_hash_accessor.
     * Bloonix::Accessors: Improved mk_hash_accessor.
 
 bloonix-core (0.22) released at 2015-06-22

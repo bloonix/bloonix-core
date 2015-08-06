@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.22
+Version: 0.23
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -62,6 +62,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Thu Aug 06 2015 Jonny Schulz <js@bloonix.de> - 0.23-1
+- Bloonix::Accessors: Renamed mk_arrays to mk_array_accessor
+  and mk_hashs to mk_hash_accessor.
+- Bloonix::Accessors: Improved mk_hash_accessor.
 * Mon Jun 22 2015 Jonny Schulz <js@bloonix.de> - 0.22-1
 - Set a default value for bloonix_host_id and bloonix_service_id
   in Bloonix::Plugin.

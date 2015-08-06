@@ -1,3 +1,11 @@
+bloonix-core (0.23-1) unstable; urgency=low
+
+    * Bloonix::Accessors: Renamed mk_arrays to mk_array_accessor
+      and mk_hashs to mk_hash_accessor.
+    * Bloonix::Accessors: Improved mk_hash_accessor.
+
+ -- Jonny Schulz <js@bloonix.de>  Thu, 06 Aug 2015 21:41:11 +0200
+
 bloonix-core (0.22-1) unstable; urgency=low
 
     * Set a default value for bloonix_host_id and bloonix_service_id
