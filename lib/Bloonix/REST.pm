@@ -421,7 +421,7 @@ sub validate {
     }
 
     if ($opts{safe_cookies} && !$opts{cookie_file}) {
-        my $home = $ENV{HOME} // (getpwuid($<))[7];
+        my $home = $ENV{HOME} || (getpwuid($<))[7];
 
         if (!$home && !-d $home) {
             die "ERR: unable to determine home directory\n";
