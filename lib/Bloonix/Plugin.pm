@@ -860,7 +860,7 @@ sub eval {
         }
 
         $self->exit(
-            status => "CRITICAL",
+            status => $opts->{unknown_status},
             message => "error: $error"
         );
     }
