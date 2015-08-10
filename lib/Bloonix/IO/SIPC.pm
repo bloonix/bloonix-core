@@ -106,6 +106,7 @@ sub connect {
     my $self = shift;
     my $timeout = shift || 0;
     my %opts = %{$self->{sockopts}};
+    my @err;
 
     eval {
         local $SIG{__DIE__} = $self->die_sub;
@@ -136,19 +137,21 @@ sub connect {
                 }
 
                 if ($self->{mode} eq "failover") {
+                    push @err, "$peer:$opts{PeerPort}";
                     push @$peers, shift @$peers;
                 }
+            }
+
+            if (!$self->{sock}) {
+                die "unable to connect to ". join(", ", @err);
             }
         } else {
             # a listen socket
             if ($timeout) {
                 alarm($timeout);
             }
-            $self->{sock} = $self->{sockmod}->new(%opts);
-        }
-
-        if (!$self->{sock}) {
-            die "unable to create socket";
+            $self->{sock} = $self->{sockmod}->new(%opts)
+                or die "unable to create socket";
         }
 
         alarm(0);
@@ -383,8 +386,8 @@ sub _sock_error {
     $self->{errstr} = shift;
 
     if ($self->{sockmod} eq "IO::Socket::SSL") {
-        $self->{errstr} = IO::Socket::SSL->errstr;
-        if ($IO::Socket::SSL::SSL_ERROR) {
+        $self->{errstr} .= " - ". IO::Socket::SSL->errstr;
+        if ($IO::Socket::SSL::SSL_ERROR && $IO::Socket::SSL::SSL_ERROR ne IO::Socket::SSL->errstr) {
             $self->{errstr} .= " - ". $IO::Socket::SSL::SSL_ERROR;
         }
     } else {
