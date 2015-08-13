@@ -834,8 +834,8 @@ sub eval {
 
     $opts->{timeout} ||= 10;
     $opts->{action} ||= "execution";
-    $opts->{timeout_status} = "CRITICAL";
-    $opts->{unknown_status} = "UNKNOWN";
+    $opts->{timeout_status} ||= "CRITICAL";
+    $opts->{unknown_status} ||= "UNKNOWN";
 
     CORE::eval {
         local $SIG{__DIE__} = sub { alarm(0) };
