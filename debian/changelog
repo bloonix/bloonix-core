@@ -1,3 +1,11 @@
+bloonix-core (0.24-1) unstable; urgency=low
+
+    * Decreased the sleep time of ProcManager to check the
+      status of children. With this change the ProcManager can
+      fork new children faster if the children are all in use.
+
+ -- Jonny Schulz <js@bloonix.de>  Sun, 16 Aug 2015 14:24:55 +0200
+
 bloonix-core (0.23-1) unstable; urgency=low
 
     * Bloonix::Accessors: Renamed mk_arrays to mk_array_accessor

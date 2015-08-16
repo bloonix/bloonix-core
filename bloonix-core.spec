@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.23
+Version: 0.24
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -62,6 +62,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Sun Aug 16 2015 Jonny Schulz <js@bloonix.de> - 0.24-1
+- Decreased the sleep time of ProcManager to check the
+  status of children. With this change the ProcManager can
+  fork new children faster if the children are all in use.
 * Thu Aug 06 2015 Jonny Schulz <js@bloonix.de> - 0.23-1
 - Bloonix::Accessors: Renamed mk_arrays to mk_array_accessor
   and mk_hashs to mk_hash_accessor.
