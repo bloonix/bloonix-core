@@ -94,7 +94,7 @@ sub daemonize {
         }
 
         $self->log->debug("$idle processed idle, $running processes running");
-        Time::HiRes::usleep(200_000);
+        Time::HiRes::usleep(50_000);
     }
 
     $self->stop_server;
