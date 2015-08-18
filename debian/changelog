@@ -1,3 +1,9 @@
+bloonix-core (0.25-1) unstable; urgency=low
+
+    * Moved the creation of user bloonix into the core package.
+
+ -- Jonny Schulz <js@bloonix.de>  Tue, 18 Aug 2015 12:53:02 +0200
+
 bloonix-core (0.24-1) unstable; urgency=low
 
     * Decreased the sleep time of ProcManager to check the

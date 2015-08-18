@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.24
+Version: 0.25
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -52,6 +52,11 @@ find %{buildroot} -type f -name .packlist -exec rm -f {} ';'
 find %{buildroot} -type f -name '*.bs' -a -size 0 -exec rm -f {} ';'
 %{_fixperms} %{buildroot}/*
 
+%pre
+getent group bloonix >/dev/null || /usr/sbin/groupadd bloonix
+getent passwd bloonix >/dev/null || /usr/sbin/useradd \
+    bloonix -g bloonix -s /sbin/nologin -d /var/run/bloonix -r
+
 %clean
 rm -rf %{buildroot}
 
@@ -62,6 +67,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Tue Aug 18 2015 Jonny Schulz <js@bloonix.de> - 0.25-1
+- Moved the creation of user bloonix into the core package.
 * Sun Aug 16 2015 Jonny Schulz <js@bloonix.de> - 0.24-1
 - Decreased the sleep time of ProcManager to check the
   status of children. With this change the ProcManager can
