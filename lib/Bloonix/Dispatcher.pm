@@ -221,6 +221,7 @@ sub run_dispatcher {
                 $self->reap_children;
                 $self->manage_requests;
                 $self->manage_objects;
+                $self->manage_quit;
             }
         };
 
@@ -313,18 +314,24 @@ sub manage_objects {
         }
     }
 
-    if (!@{$self->ready_objects} || !@{$self->ready_children}) {
-        Time::HiRes::usleep(200_000);
+    #if (!@{$self->ready_objects} || !@{$self->ready_children}) {
+    #    Time::HiRes::usleep(200_000);
+    #}
+    if (!@{$self->ready_children}) {
+        Time::HiRes::usleep(100_000);
+        return;
     }
 
-    if (!@{$self->ready_objects} && $self->on_ready) {
+    #if (!@{$self->ready_objects} && $self->on_ready) {
+    if ($self->on_ready) {
         my @ready = $self->on_ready->();
         if (@ready && defined $ready[0]) {
             push @{$self->ready_objects}, @ready;
         }
     }
 
-    if (@{$self->ready_objects} && @{$self->ready_children}) {
+    #if (@{$self->ready_objects} && @{$self->ready_children}) {
+    if (@{$self->ready_objects}) {
         my $count_children = scalar keys %{$self->children};
         my $ready_children = scalar @{$self->ready_children};
         $self->log->info(
@@ -358,6 +365,10 @@ sub manage_objects {
         close $client;
         $self->log->info("object sent to child $pid");
     }
+}
+
+sub manage_quit {
+    my $self = shift;
 
     if ($self->on_quit) {
         if ($self->on_quit->()) {

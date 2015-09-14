@@ -233,17 +233,6 @@ sub parse_options {
         }
     }
 
-    #if ($ARGV[0] && $ARGV[0] eq "--stdin") {
-    #    if ($ARGV[1] && $ARGV[1] eq "--pretty") {
-    #        $self->option->{pretty} = 1;
-    #    }
-    #    $self->parse_stdin_arguments;
-    #} elsif ($ARGV[0] && $ARGV[0] =~ /^\s*{/) {
-    #    $self->parse_json_arguments($ARGV[0]);
-    #} else {
-    #    $self->parse_command_line_arguments;
-    #}
-
     if ($self->option->{help}) {
         $self->print_help;
     }
@@ -305,7 +294,7 @@ sub parse_json_arguments {
     if (ref $options ne "HASH") {
         $self->exit(
             status => "UNKNOWN",
-            message => "invalid json input data - expect a hash ref instead an array"
+            message => "invalid json input data - expect a hash"
         );
     }
 
@@ -1801,7 +1790,7 @@ sub has_snmp {
     $self->has_host(default => $opts{host} || "127.0.0.1");
     $self->has_port(default => $opts{port} || 161);
     $self->has_snmp_community(default => $opts{community} || "public");
-    $self->has_snmp_version(default => $opts{community} || 2);
+    $self->has_snmp_version(default => $opts{version} || 2);
     $self->has_snmp_username;
     $self->has_snmp_authkey;
     $self->has_snmp_authpassword;

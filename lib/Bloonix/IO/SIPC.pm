@@ -511,8 +511,8 @@ sub validate {
         },
         force_ipv4 => {
             type => Params::Validate::SCALAR,
-            regex => qr/^(0|1|no|yes)\z/,
-            default => "yes"
+            regex => qr/^(0|1|no|yes|auto)\z/,
+            default => "auto"
         }
     });
 
@@ -542,7 +542,7 @@ sub validate {
         $opts{ssl_verifycn_scheme} = "http";
     }
 
-    if ($opts{force_ipv4}) {
+    if (($opts{force_ipv4} eq "auto" && !$opts{listen}) || $opts{force_ipv4} eq "1") {
         eval "use IO::Socket::SSL 'inet4'";
     }
 
