@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.25
+Version: 0.26
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -67,6 +67,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Mon Sep 14 2015 Jonny Schulz <js@bloonix.de> - 0.26-1
+- Did some performance improvements to Dispatcher.pm.
+- The default value for parameter force_ipv4 is now "auto", what mean
+  that ipv4 in only forced if the socket is not a listen socket.
 * Tue Aug 18 2015 Jonny Schulz <js@bloonix.de> - 0.25-1
 - Moved the creation of user bloonix into the core package.
 * Sun Aug 16 2015 Jonny Schulz <js@bloonix.de> - 0.24-1
