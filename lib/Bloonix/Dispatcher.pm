@@ -314,9 +314,6 @@ sub manage_objects {
         }
     }
 
-    #if (!@{$self->ready_objects} || !@{$self->ready_children}) {
-    #    Time::HiRes::usleep(200_000);
-    #}
     if (!@{$self->ready_children}) {
         Time::HiRes::usleep(100_000);
         return;
@@ -330,15 +327,18 @@ sub manage_objects {
         }
     }
 
-    #if (@{$self->ready_objects} && @{$self->ready_children}) {
-    if (@{$self->ready_objects}) {
-        my $count_children = scalar keys %{$self->children};
-        my $ready_children = scalar @{$self->ready_children};
-        $self->log->info(
-            scalar @{$self->ready_objects}, "objects ready,",
-            "$ready_children/$count_children children ready"
-        );
+    if (!@{$self->ready_objects}) {
+        Time::HiRes::usleep(100_000);
+        return;
     }
+
+    my $count_children = scalar keys %{$self->children};
+    my $ready_children = scalar @{$self->ready_children};
+
+    $self->log->info(
+        scalar @{$self->ready_objects}, "objects ready,",
+        "$ready_children/$count_children children ready"
+    );
 
     while (@{$self->ready_objects} && @{$self->ready_children}) {
         my $child = shift @{$self->ready_children};

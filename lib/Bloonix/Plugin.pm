@@ -1010,6 +1010,12 @@ sub result {
     return $self->{result};
 }
 
+sub set_tag {
+    my ($self, $tag) = @_;
+
+    push @{$self->{set_tags}}, $tag;
+}
+
 sub exit {
     my ($self, %opts) = @_;
     my $exitcode = $self->{exitcode};
@@ -1043,6 +1049,12 @@ sub exit {
         if (@tags) {
             $opts{tags} = join(",", @tags);
         }
+    }
+
+    if ($self->{set_tags}) {
+        $opts{tags} = $opts{tags}
+            ? join(",", $opts{tags}, @{$self->{set_tags}})
+            : join(",", @{$self->{set_tags}});
     }
 
     if ($self->option->{pretty}) {

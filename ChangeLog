@@ -3,6 +3,7 @@ bloonix-core (0.26) released at 2015-09-14
     * Did some performance improvements to Dispatcher.pm.
     * The default value for parameter force_ipv4 is now "auto", what mean
       that ipv4 in only forced if the socket is not a listen socket.
+    * Added method set_tag to Bloonix::Plugin.
 
 bloonix-core (0.25) released at 2015-08-18
 
