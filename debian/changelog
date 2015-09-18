@@ -3,6 +3,7 @@ bloonix-core (0.26-1) unstable; urgency=low
     * Did some performance improvements to Dispatcher.pm.
     * The default value for parameter force_ipv4 is now "auto", what mean
       that ipv4 in only forced if the socket is not a listen socket.
+    * Added method set_tag to Bloonix::Plugin.
 
  -- Jonny Schulz <js@bloonix.de>  Mon, 14 Sep 2015 05:35:12 +0200
 

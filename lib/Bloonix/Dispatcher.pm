@@ -483,6 +483,10 @@ sub run_child {
     while ($self->done == 0) {
         if ($connect == 1) {
             $socket = $self->send_ready;
+            if (!$socket) {
+                sleep 3;
+                next;
+            }
             $select = IO::Select->new($socket);
             $connect = 0;
         }
@@ -502,6 +506,11 @@ sub run_child {
             $self->log->info("reading job");
             my $line = <$sock>;
             close $sock;
+
+            if (!$line) {
+                $self->log->info("skip empty line");
+                next;
+            }
 
             $self->log->info("got a job");
             $self->sent_done(0);
@@ -703,32 +712,33 @@ sub postpare_message {
 
 sub send_ready {
     my $self = shift;
-    $self->send_status("ready");
+    return $self->send_status("ready");
 }
 
 sub send_done {
     my $self = shift;
     my $message = $self->prepare_message(@_);
     $self->sent_done(1);
-    $self->send_status("done:$message");
+    return $self->send_status("done:$message");
 }
 
 sub send_err {
     my $self = shift;
     my $message = $self->prepare_message(@_);
     $self->sent_done(1);
-    $self->send_status("err:$message");
+    return $self->send_status("err:$message");
 }
 
 sub send_alive {
     my $self = shift;
-    $self->send_status("alive");
+    return $self->send_status("alive");
 }
 
 sub send_status {
     my ($self, $status) = @_;
 
     if (!$self->is_win32) {
+        $self->log->info("connect to parent");
         my $socket = $self->connect_to_parent;
         $self->log->info("child $$ status: $status");
         print $socket "$$:$status\n";
