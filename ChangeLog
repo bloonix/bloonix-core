@@ -1,6 +1,7 @@
-bloonix-core (0.27) released at 2015-XX-XX
+bloonix-core (0.27) released at 2015-09-18
 
     * Fixed: skip empty objects to prevent json decode errors.
+    * Child process now exit if the parent sock connet runs on a timeout.
 
 bloonix-core (0.26) released at 2015-09-14
 

@@ -674,11 +674,25 @@ sub validate {
 
 sub connect_to_parent {
     my $self = shift;
+    my $socket;
 
-    my $socket = IO::Socket::UNIX->new(
-        Type => SOCK_STREAM,
-        Peer => $self->sock_file
-    ) or $self->log->die(error => "unable to connect to socket", $self->sock_file, "-", $!);
+    eval {
+        local $SIG{__DIE__} = sub { alarm(0) };
+        local $SIG{ALRM} = sub { die "timeout" };
+        alarm(30);
+        $socket = IO::Socket::UNIX->new(
+            Type => SOCK_STREAM,
+            Peer => $self->sock_file
+        );
+        alarm(0);
+    };
+
+    # if the child is unable to connect to the parent
+    # the we expect that the parent is dead
+    if (!$socket) {
+        $self->log->info("unable to connect to parent sock: exit 9");
+        exit 9;
+    }
 
     return $socket;
 }

@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.26
+Version: 0.27
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -67,6 +67,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Fri Sep 18 2015 Jonny Schulz <js@bloonix.de> - 0.27-1
+- Fixed: skip empty objects to prevent json decode errors.
 * Mon Sep 14 2015 Jonny Schulz <js@bloonix.de> - 0.26-1
 - Did some performance improvements to Dispatcher.pm.
 - The default value for parameter force_ipv4 is now "auto", what mean
