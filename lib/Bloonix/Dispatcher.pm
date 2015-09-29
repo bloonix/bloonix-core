@@ -259,7 +259,13 @@ sub manage_requests {
 
             if ($line =~ /^(\d+):(.+)$/) {
                 my ($pid, $status) = ($1, $2);
-            
+
+                # go away :-)
+                if (!exists $self->children->{$pid}) {
+                    $self->log->warning("killing non existent pid $pid");
+                    kill 9, $pid;
+                }
+
                 $self->log->debug("child $pid status $status");
 
                 if ($status eq "ready") {
@@ -690,7 +696,7 @@ sub connect_to_parent {
     # if the child is unable to connect to the parent
     # the we expect that the parent is dead
     if (!$socket) {
-        $self->log->info("unable to connect to parent sock: exit 9");
+        $self->log->error("unable to connect to parent sock: exit 9");
         exit 9;
     }
 
