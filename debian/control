@@ -9,6 +9,6 @@ Homepage: http://www.bloonix.de/
 
 Package: bloonix-core
 Architecture: all
-Depends: ${perl:Depends}, ca-certificates, openssl, libhttp-tiny-perl (>= 0.022), libio-compress-perl, libio-socket-inet6-perl, libio-socket-ssl-perl (>= 1.77), libjson-perl, libjson-xs-perl, liblog-handler-perl (>= 0.84), libnet-snmp-perl, libparams-validate-perl, libsocket6-perl, libtime-modules-perl
+Depends: ${perl:Depends}, ca-certificates, openssl, libhttp-tiny-perl (>= 0.022), libio-compress-perl, libio-socket-inet6-perl, libio-socket-ssl-perl (>= 1.77), libjson-perl, libjson-xs-perl, liblog-handler-perl (>= 0.84), libnet-snmp-perl, libnetaddr-ip-perl, libparams-validate-perl, libsocket6-perl, libtime-modules-perl
 Description: Bloonix core modules
  Core modules for the Bloonix application.

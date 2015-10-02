@@ -10,4 +10,5 @@ use Bloonix::Timeperiod;
 use Bloonix::Timezone;
 use Bloonix::REST;
 use Bloonix::IO::SIPC;
+use Bloonix::NetAddr;
 ok(1, "use");

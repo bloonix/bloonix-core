@@ -28,6 +28,7 @@ Requires: perl(JSON)
 Requires: perl(Log::Handler) >= 0.84
 Requires: perl(Net::DNS::Resolver)
 Requires: perl(Net::SNMP)
+Requires: perl(NetAddr::IP)
 Requires: perl(Params::Validate)
 Requires: perl(Socket6)
 Requires: perl(Term::ReadKey)
