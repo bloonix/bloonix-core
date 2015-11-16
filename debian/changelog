@@ -1,3 +1,11 @@
+bloonix-core (0.28-1) unstable; urgency=low
+
+    * New module Bloonix::NetAddr.
+    * Moved Bloonix::Validator to the core package and renamed it to
+      Bloonix::Validate.
+
+ -- Jonny Schulz <js@bloonix.de>  Mon, 16 Nov 2015 12:58:42 +0100
+
 bloonix-core (0.27-1) unstable; urgency=low
 
     * Fixed: skip empty objects to prevent json decode errors.

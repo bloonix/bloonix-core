@@ -68,6 +68,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Mon Nov 16 2015 Jonny Schulz <js@bloonix.de> - 0.28-1
+- New module Bloonix::NetAddr.
+- Moved Bloonix::Validator to the core package and renamed it to
+  Bloonix::Validate.
 * Fri Sep 18 2015 Jonny Schulz <js@bloonix.de> - 0.27-1
 - Fixed: skip empty objects to prevent json decode errors.
 * Mon Sep 14 2015 Jonny Schulz <js@bloonix.de> - 0.26-1
