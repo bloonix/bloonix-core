@@ -146,31 +146,13 @@ sub _add_default_options {
     );
 
     $self->add_option(
-        name => "Plugin libdir",
-        option => "plugin-libdir",
-        value_desc => "path",
-        value_type => "string",
-        description => "The path to store temporary check data.",
-        command_line_only => 1
-    );
-
-    $self->add_option(
-        name => "Config path",
-        option => "config-path",
-        value_desc => "path",
-        value_type => "string",
-        description => "The base path to the config directory of the agent.",
-        command_line_only => 1
-    );
-
-    $self->add_option(
         name => "Host ID",
         option => "bloonix-host-id",
         value_desc => "id",
         value_type => "string",
         regex => qr/^[a-z0-9\-\.]+\z/,
         description => "The host ID of the check in the WebGUI.",
-        command_line_only => 1,
+        command_line_only => 1
     );
 
     $self->add_option(
@@ -1190,7 +1172,12 @@ sub check_thresholds {
                 );
             }
 
-            $value = $self->convert_to_bytes($threshold);
+            $value = $threshold;
+            if ($self->{unit_by_keys}->{$key} eq "bytes") {
+                $value = $self->convert_to_bytes($value);
+            } elsif ($self->{unit_by_keys}->{$key} eq "percent") {
+                $value =~ s/%//;
+            }
 
             if ($op ne "eq" && $op ne "ne" && (!defined $value || $value !~ /^-{0,1}\d+(\.\d+){0,1}\z/)) {
                 $self->exit(
@@ -1220,14 +1207,14 @@ sub check_thresholds {
         next unless exists $stats->{$key};
         $checked{$key} = 1;
 
-        # maybe the stats key exists but is not added via has_thresholds
-        $self->{has_units}->{$key} ||= "none";
+        # Maybe the key exists in stats but were not added via has_thresholds
+        $self->{unit_by_keys}->{$key} ||= "none";
 
         my $upshot = "$key=";
 
-        if ($self->{has_units}->{$key} eq "bytes") {
+        if ($self->{unit_by_keys}->{$key} eq "bytes") {
             $upshot .= $self->convert_bytes_to_string($stats->{$key});
-        } elsif ($self->{has_units}->{$key} eq "percent") {
+        } elsif ($self->{unit_by_keys}->{$key} eq "percent") {
             $upshot .= $stats->{$key} . "%";
         } else {
             $upshot .= $stats->{$key};
@@ -1258,29 +1245,6 @@ sub check_thresholds {
     }
 
     return $result;
-}
-
-sub convert_to_operator {
-    my ($self, $op) = @_;
-
-    if ($op eq "ge") {
-        return ">=";
-    }
-    if ($op eq "le") {
-        return "<=";
-    }
-    if ($op eq "gt") {
-        return ">";
-    }
-    if ($op eq "lt") {
-        return "<";
-    }
-    if ($op eq "eq") {
-        return "==";
-    }
-    if ($op eq "ne") {
-        return "!=";
-    }
 }
 
 sub convert_operator_to_string {
@@ -1399,6 +1363,11 @@ sub convert_bytes_to_string {
         $unit = "KB";
     }
 
+    if ($unit eq "B") {
+        $unit =~ s/\..+//;
+        return "$value$unit";
+    }
+
     return sprintf("%.1f%s", $value, $unit);
 }
 
@@ -1428,7 +1397,7 @@ sub has_threshold {
         }
 
         push @{$keys_by_unit{$unit}}, $key;
-        $self->{has_units}->{$key} = $unit;
+        $self->{unit_by_keys}->{$key} = $unit;
     }
 
     foreach my $unit (keys %keys_by_unit) {
@@ -1441,6 +1410,11 @@ sub has_threshold {
             push @regexes, qr/^($keys):((lt|le|gt|ge|eq|ne):){0,1}(\d+(?:\.\d+){0,1})%{0,1}\z/;
         } elsif ($unit eq "bytes") {
             push @regexes, qr/^($keys):((lt|le|gt|ge|eq|ne):){0,1}(\d+(?:\.\d+){0,1})([KMGTPEZYC]B){0,1}\z/;
+        } else {
+            $self->exit(
+                status => "UNKNOWN",
+                message => "Internal plugin error: invalid unit '$unit'"
+            );
         }
     }
 
@@ -1456,7 +1430,6 @@ sub has_threshold {
     $warning_opts->{value_type} = $critical_opts->{value_type} = "string";
     $warning_opts->{multiple} = $critical_opts->{multiple} = 1;
     $warning_opts->{keys} = $critical_opts->{keys} = $opts{keys};
-    $warning_opts->{units} = $critical_opts->{units} = $self->{has_units};
     $warning_opts->{regex} = $critical_opts->{regex} = \@regexes;
     $warning_opts->{value_desc} = $critical_opts->{value_desc} = "key:value or key:op:value";
 
@@ -2033,8 +2006,6 @@ Bloonix::Plugin::Base - The Bloonix plugin helper.
 =head2 get_secret_file
 
 =head2 convert_operator_to_string
-
-=head2 convert_to_operator
 
 =head2 convert_to_bytes
 

@@ -27,17 +27,21 @@ sub hang_up {
 sub switch_group {
     my ($self, $group) = @_;
 
-    Bloonix::SwitchUser->switch_group(
-        $group || $self->{group}
-    );
+    if ($group || $self->{group}) {
+        Bloonix::SwitchUser->switch_group(
+            $group || $self->{group}
+        );
+    }
 }
 
 sub switch_user {
     my ($self, $user) = @_;
 
-    Bloonix::SwitchUser->switch_user(
-        $user || $self->{user}
-    );
+    if ($user || $self->{user}) {
+        Bloonix::SwitchUser->switch_user(
+            $user || $self->{user}
+        );
+    }
 }
 
 sub change_directory {

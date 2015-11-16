@@ -17,7 +17,8 @@ This module is just for internal usage.
 The configuration format is very simple:
 
     param1 value
-    param2 value
+    param2 value1
+    param2 value2
     param3 " value value value "
     param4 ' value value value '
     param5 multiline \
@@ -32,6 +33,25 @@ The configuration format is very simple:
         subsection1 {
             param1 value
             param2 value
+        }
+    }
+
+The configuration would be converted into:
+
+    {
+        param1 => "value",
+        param2 => ["value1", "value2"],
+        param3 => " value value value ",
+        param4 => " value value value ",
+        param5 => "multiline value",
+        param6 => " multiline values with whitespaces ",
+        section1 => {
+            param1 => "value",
+            param2 => "value",
+            subsection1 => {
+                param1 => "value",
+                param2 => "value",
+            }
         }
     }
 
@@ -50,7 +70,7 @@ Add comments to the configuration to explain parameter:
 
 =head2 HASHES VS ARRRAYS
 
-Please not that if a hash key exists that the values will be pushed into an array:
+If a hash key exists then a array is created:
 
     param1 value
     param2 value1
@@ -66,7 +86,7 @@ Please not that if a hash key exists that the values will be pushed into an arra
         param value
     }
 
-is
+will be converted into:
 
     param1 => "value",
     param2 => [ "value1", "value2" ],
@@ -173,7 +193,7 @@ sub _include_dir {
         or die "Unable to open dir '$dir' for reading - $!";
 
     while (my $file = readdir $dh) {
-        if (-f "$dir/$file" && $file =~ /.+.conf\z/) {
+        if (-f "$dir/$file" && $file =~ /.+\.conf\z/) {
             $self->_include_config("$dir/$file", $config, $enc);
         }
     }
@@ -216,14 +236,17 @@ sub _parse_config {
             $self->_add_key_value($config, $key, $value);
             $self->_parse_config($fh, $value);
             next;
+        }
 
         # A key value pair. The value can be an empty string.
-        } elsif ($line =~ /^([^\s]+)\s*(.*)/) {
+        if ($line =~ /^([^\s]+)\s*(.*)/) {
             ($key, $value) = ($1, $2);
         }
 
         # Look if the end of the line is marked as multiline.
-        $is_multiline = $value =~ s/\s*\\\z//;
+        if (ref $value ne "HASH") {
+            $is_multiline = $value =~ s/\s*\\\z//;
+        }
 
         # Remove the quotes of quoted values.
         if ($value =~ /^'(.*)'\z/ || $value =~ /^"(.*)"\z/) {
@@ -253,6 +276,7 @@ sub _add_key_value {
     my ($self, $config, $key, $value) = @_;
 
     if ($key eq "include") {
+        # Match root with "/" or "C:\"
         if ($self->{path} && $value !~ m!^(/|[a-z]:[/\\])!i) {
             $value = join(DIRDELIM, $self->{path}, $value);
         }

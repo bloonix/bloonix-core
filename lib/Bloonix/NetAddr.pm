@@ -12,16 +12,19 @@ sub ip_in_range {
         $b = join(",", @$b);
     }
 
-    if (!$a || !$b) {
+    if (!$a || !$b || $a eq "::") {
         return $ret;
+    }
+
+    if ($b eq "all") {
+        return 1;
     }
 
     $a =~ s/\s//g;
     $b =~ s/\s//g;
 
-    if ($b eq "all") {
-        return 1;
-    }
+    # ::ffff:127.0.0.1
+    $a =~ s/^::ffff:(\d+\.\d+\.\d+\.\d+)\z/$1/;
 
     eval {
         my $ip_a = NetAddr::IP->new($a);

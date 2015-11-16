@@ -1,6 +1,8 @@
-bloonix-core (0.28) released at 2015-10-01
+bloonix-core (0.28) released at 2015-11-15
 
     * New module Bloonix::NetAddr.
+    * Moved Bloonix::Validator to the core package and renamed it to
+      Bloonix::Validate.
 
 bloonix-core (0.27) released at 2015-09-18
 
