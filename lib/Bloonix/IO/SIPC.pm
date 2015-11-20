@@ -572,7 +572,7 @@ sub validate {
 
     if ($opts{listen}) {
         $opts{sockopts}{Listen} = SOMAXCONN;
-        $opts{sockopts}{Reuse}  = 1;
+        $opts{sockopts}{ReuseAddr}  = 1;
         $opts{sockopts}{Proto}  = "tcp";
     } elsif ($opts{connect_timeout}) {
         $opts{sockopts}{Timeout} = $opts{connect_timeout};
