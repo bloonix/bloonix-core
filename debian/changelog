@@ -1,3 +1,9 @@
+bloonix-core (0.29-1) unstable; urgency=low
+
+    * Fixed dependency: Net::DNS
+
+ -- Jonny Schulz <js@bloonix.de>  Sun, 22 Nov 2015 08:54:53 +0100
+
 bloonix-core (0.28-1) unstable; urgency=low
 
     * New module Bloonix::NetAddr.
