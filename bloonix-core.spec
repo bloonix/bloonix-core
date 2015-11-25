@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.29
+Version: 0.30
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -68,6 +68,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Wed Nov 25 2015 Jonny Schulz <js@bloonix.de> - 0.30-1
+- Fixed field length for PIDs in SharedFile.pm.
 * Sun Nov 22 2015 Jonny Schulz <js@bloonix.de> - 0.29-1
 - Fixed dependency: Net::DNS
 * Mon Nov 16 2015 Jonny Schulz <js@bloonix.de> - 0.28-1
