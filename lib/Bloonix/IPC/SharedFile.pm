@@ -38,12 +38,12 @@ sub new {
 
     $self->{keys} = {
         # key - offset - size
-        pid     => [   0,   5 ],
-        status  => [   5,   1 ],
-        time    => [   6,  10 ],
-        ttlreq  => [  16,  20 ],
-        client  => [  36,  39 ],
-        request => [  75, 949 ],
+        pid     => [   0,  10 ],
+        status  => [  10,   1 ],
+        time    => [  11,  10 ],
+        ttlreq  => [  21,  20 ],
+        client  => [  41,  39 ],
+        request => [  80, 999 ],
     };
 
     return $self;
