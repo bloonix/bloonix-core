@@ -1149,6 +1149,7 @@ sub check_thresholds {
     my ($self, %opts) = @_;
     my $stats = $opts{stats};
     my $upshot_keys = $opts{upshot_keys};
+    my $factor = $opts{factor};
     my $hits = { };
     my $result = { status => "OK", hits => $hits };
     my (@upshot, %checked);
@@ -1184,6 +1185,10 @@ sub check_thresholds {
                     status => "UNKNOWN",
                     message => "value of threshold '$key' is not numeric"
                 );
+            }
+
+            if ($factor) {
+                $value *= $factor;
             }
 
             if ($self->compare($stats->{$key}, $op, $value)) {
@@ -1235,6 +1240,10 @@ sub check_thresholds {
     }
 
     $result->{upshot} = join(", ", @upshot);
+
+    if ($factor) {
+        $result->{upshot} .= " (factor=$factor)";
+    }
 
     if ($opts{exit} && $opts{exit} ne "no") {
         $self->exit(
