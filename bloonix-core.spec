@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.31
+Version: 0.32
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -68,6 +68,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Fri Nov 27 2015 Jonny Schulz <js@bloonix.de> - 0.32-1
+- Fix IPv4 and IPv6 parser.
 * Thu Nov 26 2015 Jonny Schulz <js@bloonix.de> - 0.31-1
 - Implemented feature "factor" in Bloonix::Plugin.
 * Wed Nov 25 2015 Jonny Schulz <js@bloonix.de> - 0.30-1
