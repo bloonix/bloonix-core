@@ -519,7 +519,7 @@ sub validate {
 
     foreach my $key (qw/listen use_ssl auto_connect force_ipv4/) {
         if (defined $opts{$key}) {
-            $opts{$key} = $opts{$key} eq "yes" ? 1 : 0;
+            $opts{$key} = $opts{$key} =~ /^(yes|1)\z/ ? 1 : 0;
         }
     }
 
