@@ -1,3 +1,9 @@
+bloonix-core (0.33-1) unstable; urgency=low
+
+    * Improved logging in Bloonix::IO::SIPC.
+
+ -- Jonny Schulz <js@bloonix.de>  Mon, 18 Jan 2016 18:45:18 +0100
+
 bloonix-core (0.32-1) unstable; urgency=low
 
     * Fix IPv4 and IPv6 parser.

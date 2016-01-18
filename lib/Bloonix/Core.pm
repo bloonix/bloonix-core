@@ -1,5 +1,5 @@
 package Bloonix::Core;
 
-our $VERSION = "0.31";
+our $VERSION = "0.32";
 
 1;

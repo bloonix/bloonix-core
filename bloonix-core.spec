@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.32
+Version: 0.33
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -68,6 +68,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Mon Jan 18 2016 Jonny Schulz <js@bloonix.de> - 0.33-1
+- Improved logging in Bloonix::IO::SIPC.
 * Fri Nov 27 2015 Jonny Schulz <js@bloonix.de> - 0.32-1
 - Fix IPv4 and IPv6 parser.
 * Thu Nov 26 2015 Jonny Schulz <js@bloonix.de> - 0.31-1

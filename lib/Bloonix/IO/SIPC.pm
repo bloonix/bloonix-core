@@ -158,6 +158,7 @@ sub connect {
     };
 
     if ($@) {
+        $self->log->error($@);
         $self->_sock_error($@);
         die $self->errstr;
     }
@@ -517,8 +518,8 @@ sub validate {
     });
 
     foreach my $key (qw/listen use_ssl auto_connect force_ipv4/) {
-        if (defined $opts{$key} && $opts{$key} eq "no") {
-            $opts{$key} = 0;
+        if (defined $opts{$key}) {
+            $opts{$key} = $opts{$key} eq "yes" ? 1 : 0;
         }
     }
 
@@ -542,7 +543,7 @@ sub validate {
         $opts{ssl_verifycn_scheme} = "http";
     }
 
-    if (($opts{force_ipv4} eq "auto" && !$opts{listen}) || $opts{force_ipv4} eq "1") {
+    if (($opts{force_ipv4} eq "auto" && !$opts{listen}) || $opts{force_ipv4}) {
         eval "use IO::Socket::SSL 'inet4'";
     }
 

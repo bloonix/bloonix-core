@@ -1,3 +1,7 @@
+bloonix-core (0.33) released at 2016-01-18
+
+    * Improved logging in Bloonix::IO::SIPC.
+
 bloonix-core (0.32) released at 2015-11-27
 
     * Fix IPv4 and IPv6 parser.
