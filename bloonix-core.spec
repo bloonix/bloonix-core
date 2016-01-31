@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.33
+Version: 0.34
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -68,6 +68,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Sun Jan 31 2016 Jonny Schulz <js@bloonix.de> - 0.34-1
+- Fixed slot size in Bloonix::IPC::SharedFile.
 * Mon Jan 18 2016 Jonny Schulz <js@bloonix.de> - 0.33-1
 - Improved logging in Bloonix::IO::SIPC.
 * Fri Nov 27 2015 Jonny Schulz <js@bloonix.de> - 0.32-1

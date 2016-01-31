@@ -1,3 +1,9 @@
+bloonix-core (0.34-1) unstable; urgency=low
+
+    * Fixed slot size in Bloonix::IPC::SharedFile.
+
+ -- Jonny Schulz <js@bloonix.de>  Sun, 31 Jan 2016 17:40:30 +0100
+
 bloonix-core (0.33-1) unstable; urgency=low
 
     * Improved logging in Bloonix::IO::SIPC.
