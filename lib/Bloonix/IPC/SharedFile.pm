@@ -43,7 +43,7 @@ sub new {
         time    => [  11,  10 ],
         ttlreq  => [  21,  20 ],
         client  => [  41,  39 ],
-        request => [  80, 999 ],
+        request => [  80, 944 ],
     };
 
     return $self;
