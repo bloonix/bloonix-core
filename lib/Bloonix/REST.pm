@@ -230,7 +230,11 @@ sub request {
             $req_opts
         );
 
-        if ($res->{success}) {
+        if ($res->{success} ||
+                ($opts->{http_status} &&
+                    ref $res eq "HASH" &&
+                    $res->{status} eq $opts->{http_status})
+        ) {
             $self->log->info("rest: request was successful");
             return $self->_process_content($res);
         }
