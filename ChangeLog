@@ -1,3 +1,7 @@
+bloonix-core (0.35) released at 2016-03-28
+
+    * Extra release because the gpg key of bloonix is updated.
+
 bloonix-core (0.34) released at 2016-01-18
 
     * Fixed slot size in Bloonix::IPC::SharedFile.
