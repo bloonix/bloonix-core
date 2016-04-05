@@ -1,3 +1,7 @@
+bloonix-core (0.36) released at 2016-04-05
+
+    * Fixed lots of Timeperiod bugs.
+
 bloonix-core (0.35) released at 2016-03-28
 
     * Extra release because the gpg key of bloonix is updated.

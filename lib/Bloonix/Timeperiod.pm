@@ -138,24 +138,12 @@ my $RX_YEAR = qr/
     \d{4}
 /x;
 
-my $RX_DATE_PRE_YEAR = qr/
-    \d{4}                               # year
-    [-\/\.]                             # separator
-    (?:0{0,1}[1-9]|1[0-2])              # month 01 - 12
-    [-\/\.]                             # separator
-    (?:0{0,1}[1-9]|[1-2][0-9]|3[0-1])   # day 01 - 31
-/x;
-
-my $RX_DATE_POST_YEAR = qr/
-    (?:0{0,1}[1-9]|1[0-2])              # month 01 - 12
-    [-\/\.]                             # separator
-    (?:0{0,1}[1-9]|[1-2][0-9]|3[0-1])   # day 01 - 31
-    [-\/\.]                             # separator
-    \d{4}                               # year
-/x;
-
 my $RX_DATE = qr/
-    (?:$RX_DATE_PRE_YEAR|$RX_DATE_POST_YEAR)
+    \d{4}                               # year
+    -                                   # separator
+    (?:0{0,1}[1-9]|1[0-2])              # month 01 - 12
+    -                                   # separator
+    (?:0{0,1}[1-9]|[1-2][0-9]|3[0-1])   # day 01 - 31
 /x;
 
 my $RX_TIME = qr/
@@ -254,7 +242,17 @@ sub check {
 
         # If the time string matched it must be checked if the
         # the date/or that is in $date matched $time.
-        my ($from_date, $to_date) = split /-/, $date_string;
+        my ($from_date, $to_date);
+
+        if ($format eq "date") {
+            if ($date_string =~ /^\s*(\d{4}-\d{2}-\d{2})\s*-\s*(\d{4}-\d{2}-\d{2})\s*\z/) {
+                ($from_date, $to_date) = ($1, $2);
+            } elsif ($date_string =~ /^(\d{4}-\d{2}-\d{2})\z/) {
+                $from_date = $to_date = $1;
+            }
+        } else {
+            ($from_date, $to_date) = split /-/, $date_string;
+        }
 
         if ($format =~ /^(?:weekday|month|year)\z/) {
             if ($format ne "year") {
@@ -269,72 +267,73 @@ sub check {
                 }
             }
 
-            if ($to_date) {
-                if ($time->{$format} >= $from_date && $time->{$format} <= $to_date) {
-                    return 1;
-                }
-            } elsif ($from_date == $time->{$format}) {
+            if (!$to_date) {
+                $to_date = $from_date;
+            }
+
+            if ($time->{$format} >= $from_date && $time->{$format} <= $to_date) {
                 return 1;
             }
         } elsif ($format eq "month_with_day") {
-            my ($fmonth, $fday) = split /\s/, $from_date;
-            $fmonth = substr($fmonth, 0, 3);
-            $fmonth = lc($fmonth);
+            my ($fmon, $fday) = split /\s/, $from_date;
+            $fmon = substr($fmon, 0, 3);
+            $fmon = lc($fmon);
+            $fmon = sprintf("%02d", $NAME_2_NUM{$fmon});
+            $fday = sprintf("%02d", $fday);
+            my ($tmon, $tday);
 
             if ($to_date) {
-                my ($tmonth, $tday) = split /\s/, $to_date;
-                $tmonth = substr($tmonth, 0, 3);
-                $tmonth = lc($tmonth);
+                ($tmon, $tday) = split /\s/, $to_date;
+                $tmon = substr($tmon, 0, 3);
+                $tmon = lc($tmon);
+                $tmon = sprintf("%02d", $NAME_2_NUM{$tmon});
+                $tday = sprintf("%02d", $tday);
+            } else {
+                ($tmon, $tday) = ($fmon, $fday);
+            }
 
-                if (
-                    $time->{month} >= $fmonth &&
-                    $time->{day}   >= $fday   &&
-                    $time->{month} <= $tmonth &&
-                    $time->{day}   <= $tday
-                ) {
-                    return 1;
-                }
-            } elsif ($fmonth == $time->{month} && $fday == $time->{day}) {
+            my $curdate = sprintf("1%02d%02d", $time->{month}, $time->{day});
+            $from_date = "1$fmon$fday";
+            $to_date = "1$tmon$tday";
+
+            if ($curdate >= $from_date && $curdate <= $to_date) {
                 return 1;
             }
         } elsif ($format eq "year_month") {
-            my ($fyear, $fmonth) = split /\s/, $from_date;
-            $fmonth = substr($fmonth, 0, 3);
-            $fmonth = lc($fmonth);
+            my ($fyear, $fmon) = split /\s/, $from_date;
+            $fmon = substr($fmon, 0, 3);
+            $fmon = lc($fmon);
+            $fmon = sprintf("%02d", $NAME_2_NUM{$fmon});
+            my ($tyear, $tmon);
 
             if ($to_date) {
-                my ($tyear, $tmonth) = split /\s/, $to_date;
-                $tmonth = substr($tmonth, 0, 3);
-                $tmonth = lc($tmonth);
+                ($tyear, $tmon) = split /\s/, $to_date;
+                $tmon = substr($tmon, 0, 3);
+                $tmon = lc($tmon);
+                $tmon = sprintf("%02d", $NAME_2_NUM{$tmon});
+            } else {
+                ($tyear, $tmon) = ($fyear, $fmon);
+            }
 
-                if (
-                    $time->{year}  >= $fyear  && 
-                    $time->{month} >= $fmonth &&
-                    $time->{year}  <= $tyear  &&
-                    $time->{month} <= $tmonth
-                ) {
-                    return 1;
-                }
-            } elsif ($fyear == $time->{year} && $fmonth == $time->{month}) {
+            my $curdate = sprintf("%04d%02d", $time->{year}, $time->{month});
+            $from_date = "$fyear$fmon";
+            $to_date = "$tyear$tmon";
+
+            if ($curdate >= $from_date && $curdate <= $to_date) {
                 return 1;
             }
         } elsif ($format eq "date") {
-            my ($fyear, $fmonth, $fday) = split /\W/, $from_date;
+            $from_date =~ s/\W//g;
 
             if ($to_date) {
-                my ($tyear, $tmonth, $tday) = split /\W/, $to_date;
+                $to_date =~ s/\W//g;
+            } else {
+                $to_date = $from_date;
+            }
 
-                if (
-                    $time->{year}  >= $fyear  &&
-                    $time->{month} >= $fmonth &&
-                    $time->{day}   >= $fday   &&
-                    $time->{year}  <= $tyear  &&
-                    $time->{month} <= $tmonth &&
-                    $time->{day}   <= $tday
-                ) {
-                    return 1;
-                }
-            } elsif ($fyear == $time->{year} && $fmonth == $time->{month} && $fday == $time->{day}) {
+            my $curdate = sprintf("%04d%02d%02d", $time->{year}, $time->{month}, $time->{day});
+
+            if ($curdate >= $from_date && $curdate <= $to_date) {
                 return 1;
             }
         }
