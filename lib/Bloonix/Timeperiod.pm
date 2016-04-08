@@ -114,6 +114,10 @@ my $RX_DAY = qr/
 /x;
 
 my $RX_MONTH = qr/
+    (?:0{0,1}[1-9]|1[0-2])
+/x;
+
+my $RX_MONTH_NAME = qr/
     (?:
         [Jj]an (?:uary){0,1}    |
         [Ff]eb (?:ruary){0,1}   |
@@ -131,19 +135,23 @@ my $RX_MONTH = qr/
 /x;
 
 my $RX_MONTH_WITH_DAY = qr/
-    $RX_MONTH\s+$RX_DAY
+    $RX_MONTH_NAME\s+$RX_DAY
 /x;
 
 my $RX_YEAR = qr/
     \d{4}
 /x;
 
+my $RX_YEAR_MONTH = qr/
+    $RX_YEAR-$RX_MONTH
+/x;
+
 my $RX_DATE = qr/
-    \d{4}                               # year
+    $RX_YEAR                            # year
     -                                   # separator
-    (?:0{0,1}[1-9]|1[0-2])              # month 01 - 12
+    $RX_MONTH                           # month 01 - 12
     -                                   # separator
-    (?:0{0,1}[1-9]|[1-2][0-9]|3[0-1])   # day 01 - 31
+    $RX_DAY                             # day 01 - 31
 /x;
 
 my $RX_TIME = qr/
@@ -174,9 +182,9 @@ my %NAME_2_NUM = (
 
 my %ALLOWED_FORMATS = (
     weekday         => qr/^($RX_WEEKDAY(?:\s*-\s*$RX_WEEKDAY){0,1})\s+($RX_TIME_LIST)\z/,
-    month           => qr/^($RX_MONTH(?:\s*-\s*$RX_MONTH){0,1})\s+($RX_TIME_LIST)\z/,
+    month           => qr/^($RX_MONTH_NAME(?:\s*-\s*$RX_MONTH_NAME){0,1})\s+($RX_TIME_LIST)\z/,
     month_with_day  => qr/^($RX_MONTH_WITH_DAY(?:\s*-\s*$RX_MONTH_WITH_DAY){0,1})\s+($RX_TIME_LIST)\z/,
-    year_month      => qr/^($RX_YEAR\s+$RX_MONTH(?:\s*-\s*$RX_YEAR\s+$RX_MONTH){0,1})\s+($RX_TIME_LIST)\z/,
+    year_month      => qr/^($RX_YEAR_MONTH(?:\s*-\s*$RX_YEAR_MONTH){0,1})\s+($RX_TIME_LIST)\z/,
     year            => qr/^($RX_YEAR(?:\s*-\s*$RX_YEAR){0,1})\s+($RX_TIME_LIST)\z/,
     date            => qr/^($RX_DATE(?:\s*-\s*$RX_DATE){0,1})\s+($RX_TIME_LIST)\z/,
 );
@@ -250,6 +258,12 @@ sub check {
             } elsif ($date_string =~ /^(\d{4}-\d{2}-\d{2})\z/) {
                 $from_date = $to_date = $1;
             }
+        } elsif ($format eq "year_month") {
+            if ($date_string =~ /^\s*(\d{4}-\d{2})\s*-\s*(\d{4}-\d{2})\s*\z/) {
+                ($from_date, $to_date) = ($1, $2);
+            } elsif ($date_string =~ /^\s*(\d{4}-\d{2})\s*\z/) {
+                $from_date = $to_date = $1;
+            }
         } else {
             ($from_date, $to_date) = split /-/, $date_string;
         }
@@ -300,17 +314,11 @@ sub check {
                 return 1;
             }
         } elsif ($format eq "year_month") {
-            my ($fyear, $fmon) = split /\s/, $from_date;
-            $fmon = substr($fmon, 0, 3);
-            $fmon = lc($fmon);
-            $fmon = sprintf("%02d", $NAME_2_NUM{$fmon});
+            my ($fyear, $fmon) = split /-/, $from_date;
             my ($tyear, $tmon);
 
             if ($to_date) {
-                ($tyear, $tmon) = split /\s/, $to_date;
-                $tmon = substr($tmon, 0, 3);
-                $tmon = lc($tmon);
-                $tmon = sprintf("%02d", $NAME_2_NUM{$tmon});
+                ($tyear, $tmon) = split /-/, $to_date;
             } else {
                 ($tyear, $tmon) = ($fyear, $fmon);
             }
