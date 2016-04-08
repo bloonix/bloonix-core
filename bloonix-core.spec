@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.36
+Version: 0.37
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -68,6 +68,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Sat Apr 09 2016 Jonny Schulz <js@bloonix.de> - 0.37-1
+- Fixed further Timeperiod bugs.
 * Tue Apr 05 2016 Jonny Schulz <js@bloonix.de> - 0.36-1
 - Fixed lots of Timeperiod bugs.
 * Tue Mar 29 2016 Jonny Schulz <js@bloonix.de> - 0.35-1
