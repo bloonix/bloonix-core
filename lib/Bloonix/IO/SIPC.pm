@@ -118,7 +118,7 @@ sub connect {
 
             if ($timeout) {
                 $opts{Timeout} = $timeout;
-                $timeout = $timeout * $count + 5;
+                $timeout = $timeout * $count;
                 alarm($timeout);
             }
 

@@ -1,3 +1,7 @@
+bloonix-core (0.38) released at 2016-04-24
+
+    * Decreased the connect timeout by 5s.
+
 bloonix-core (0.37) released at 2016-04-09
 
     * Fixed further Timeperiod bugs.
