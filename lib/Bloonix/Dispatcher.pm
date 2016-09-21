@@ -193,7 +193,7 @@ sub init_socket {
         Type   => SOCK_STREAM,
         Listen => SOMAXCONN,
         ReuseAddr => 1
-    );
+    ) or die "unable to create UNIX socket " . $self->sock_file - ": $!";
 
     $self->socket($socket);
     $self->socket->blocking(0);

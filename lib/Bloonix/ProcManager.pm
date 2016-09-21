@@ -454,9 +454,10 @@ sub get_plain_server_status {
 
         "* Status description\n\n",
         "    S - Starting up\n",
-        "    W - Waiting for connection\n",
+        "    _ - Waiting for connection\n",
         "    R - Reading request\n",
         "    P - Processing request\n",
+        "    W - Sending reply\n",
         "    N - No request received\n\n",
         "    If the status is in RWN then the columns TIME, CLIENT and REQUEST\n",
         "    shows information about the last request the process processed.\n\n",

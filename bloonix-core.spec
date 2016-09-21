@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.38
+Version: 0.40
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -68,6 +68,10 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Wed Sep 21 2016 Jonny Schulz <js@bloonix.de> - 0.40-1
+- Improved error message if the creation of a unix socket fails.
+* Wed Aug 24 2016 Jonny Schulz <js@bloonix.de> - 0.39-1
+- Fixed server-status output.
 * Sun Apr 24 2016 Jonny Schulz <js@bloonix.de> - 0.38-1
 - Decreased the connect timeout by 5s.
 * Sat Apr 09 2016 Jonny Schulz <js@bloonix.de> - 0.37-1
