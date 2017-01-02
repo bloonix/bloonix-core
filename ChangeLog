@@ -1,3 +1,7 @@
+bloonix-core (0.41) released at 2017-01-02
+
+    * Added rx_port to Validate.pm.
+
 bloonix-core (0.40) released at 2016-09-21
 
     * Improved error message if the creation of a unix socket fails.

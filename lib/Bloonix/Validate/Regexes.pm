@@ -26,7 +26,7 @@ __PACKAGE__->mk_accessors(qw/
     time date datetime datehourmin
     ipv4 ipv4net ipv6 ipv6net
     ipaddr ipaddr_all ipaddrnet ipaddrnet_all
-    class_path
+    port class_path
 /);
 
 my $rx_digit      = qr/^\d\z/;
@@ -150,6 +150,7 @@ sub new {
         ipaddr_all      => $rx_ipaddr_all,
         ipaddrnet       => $rx_ipaddrnet,
         ipaddrnet_all   => $rx_ipaddrnet_all,
+        port            => $rx_port,
         time            => $rx_time,
         date            => $rx_date,
         datetime        => $rx_datetime,

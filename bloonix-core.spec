@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.40
+Version: 0.41
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -68,6 +68,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Mon Jan 02 2017 Jonny Schulz <js@bloonix.de> - 0.41-1
+- Added rx_port to Validate.pm.
 * Wed Sep 21 2016 Jonny Schulz <js@bloonix.de> - 0.40-1
 - Improved error message if the creation of a unix socket fails.
 * Wed Aug 24 2016 Jonny Schulz <js@bloonix.de> - 0.39-1

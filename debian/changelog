@@ -1,3 +1,9 @@
+bloonix-core (0.41-1) unstable; urgency=low
+
+    * Added rx_port to Validate.pm.
+
+ -- Jonny Schulz <js@bloonix.de>  Mon, 02 Jan 2017 16:15:28 +0100
+
 bloonix-core (0.40-1) unstable; urgency=low
 
     * Improved error message if the creation of a unix socket fails.
