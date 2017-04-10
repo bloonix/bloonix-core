@@ -308,7 +308,7 @@ sub sig_chld_handler {
     my $reap = $self->to_reap;
 
     while ((my $child = waitpid(-1, WNOHANG)) > 0) {
-        if ($? > 0 && $? != 13) {
+        if ($? > 0 && $? != 15) {
             $self->log->error("child $child died: $?");
         } else {
             $self->log->notice("child $child died: $?");
