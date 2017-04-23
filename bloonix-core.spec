@@ -1,6 +1,6 @@
 Summary: Bloonix Core Package
 Name: bloonix-core
-Version: 0.42
+Version: 0.43
 Release: 1%{dist}
 License: Commercial
 Group: Utilities/System
@@ -68,6 +68,8 @@ rm -rf %{buildroot}
 %{_mandir}/man3/*
 
 %changelog
+* Sun Apr 23 2017 Jonny Schulz <js@bloonix.de> - 0.43-1
+- Fixed --help output of Plugin.pm. Thresholds will now be printed.
 * Mon Apr 10 2017 Jonny Schulz <js@bloonix.de> - 0.42-1
 - Fixed SIGTERM error messages from child processes.
 * Mon Jan 02 2017 Jonny Schulz <js@bloonix.de> - 0.41-1

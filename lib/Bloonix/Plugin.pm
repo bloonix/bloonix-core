@@ -571,11 +571,14 @@ sub print_help {
 
         my $str = "";
         foreach my $thr (@{$self->{has_threshold}}) {
-            if (length($str) + length($thr->{key}) > 100) {
+            if (length($str) + length($thr->{key}) > 80) {
                 print "    $str\n";
                 $str = "";
             }
             $str = $str ? "$str, $thr->{key}" : $thr->{key};
+        }
+        if (length $str) {
+            print "    $str\n";
         }
         print "\n";
     }
